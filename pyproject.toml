@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "lawtechhackson"
+version = "0.1.0"
+description = ""
+authors = ["Grimmer <grimmer0125@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = {extras = ["dotenv"], version = "^1.9.1"}
+StrEnum = "^0.4.8"
+
+[tool.poetry.dev-dependencies]
+yapf = "^0.32.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
