@@ -2,12 +2,12 @@ from pydantic import BaseModel, BaseSettings, Field, validator, root_validator
 
 from typing import Optional, Tuple, Literal
 
-class RelatedIssue(BaseModel):
+class RelatedIssue(BaseModel, validate_assignment=True):
     lawName: str
     issueRef: str
 
 
-class Attachment(BaseModel):
+class Attachment(BaseModel, validate_assignment=True):
     fileName: str 
     fileUrl: str
 
@@ -15,7 +15,8 @@ class Party(BaseModel):
     group: list[str]
     title: str
     value: str
-class Judgment(BaseModel):
+
+class Judgment(BaseModel, validate_assignment=True):
     """ use lawsnote as reference first """
     court: str
     date: str
