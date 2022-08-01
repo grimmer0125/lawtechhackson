@@ -8,6 +8,8 @@ authors = ["Grimmer <grimmer0125@gmail.com>"]
 python = "^3.9"
 pydantic = {extras = ["dotenv"], version = "^1.9.1"}
 StrEnum = "^0.4.8"
+beanie = "^1.11.6"
+pymongo = {extras = ["srv"], version = "^4.2.0"}
 
 [tool.poetry.dev-dependencies]
 yapf = "^0.32.0"
