@@ -1,4 +1,4 @@
-from constants import Court, Law, c
+from constants import Court, LawType
 from env import DatasetSettings
 from models import Judgment
 import json
@@ -10,8 +10,9 @@ import os
 # 2. https://www.judicial.gov.tw/tw/lp-1501-1.html
 # 3. http://www.ls.fju.edu.tw/doc/vocabulary/%E9%99%84%E4%BB%B6%E5%9B%9B%20%20%20%E6%B0%91%E4%BA%8B%E8%A8%B4%E8%A8%9F%E6%B3%95.pdf
 
-def read_file(dataset_folder, court_folder, file_name:str):
+def read_file(dataset_folder, court:Court, law: LawType, file_name:str):
     ## e.g. /Users/grimmer/git/LawTechHackson/lawsnote/judgment/臺灣士林地方法院_民事/民事裁定_110,簡聲抗,19_2021-09-29.json
+    court_folder = f"{court}_{law}"
     path = os.path.join(dataset_folder, court_folder, file_name)
     with open(path) as f:
         json_data = json.load(f)
@@ -40,7 +41,7 @@ def main():
     # TODO: load a batch of files
     file_name = "民事裁定_110,簡聲抗,19_2021-09-29.json"
     # judgment = read_file("", "sample_data", file_name)
-    judgment = read_file(settings.LAWSNOTE_JUDGMENT_PATH, f"{Court.Taiwan_Shilin_District_Court}_{Law.Civil}", file_name)
+    judgment = read_file(settings.LAWSNOTE_JUDGMENT_PATH, Court.Taiwan_Shilin_District_Court, LawType.Civil, file_name)
 
     result = analysis(judgment)
     load_to_db(result)

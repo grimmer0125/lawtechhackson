@@ -9,7 +9,7 @@ class Court(StrEnum):
     Taiwan_Kaohsiung_Juvenile_and_Family_Court =   "臺灣高雄少年及家事法院" # only 民事
     Judical_Yan  = "司法院" # 司法行政廳, only Criminal_Compensation
            
-class Law(StrEnum):
+class LawType(StrEnum):
     Criminal = "刑事"
     Civil = "民事"
     Criminal_Compensation = "－刑事補償"
