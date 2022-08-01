@@ -47,4 +47,5 @@ def main():
     load_to_db(result)
     
 if __name__ == "__main__":
+    print("start")
     main()
