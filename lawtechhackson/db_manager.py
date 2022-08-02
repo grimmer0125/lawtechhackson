@@ -47,7 +47,7 @@ async def init_mongo(connect_str, db_name, document_models):
     # Init beanie with the Product document class
     await init_beanie(database=client[db_name],
                       document_models=document_models)
-    print("done")
+    print("init mongo done")
 
 
 if __name__ == "__main__":

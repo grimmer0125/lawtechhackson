@@ -37,15 +37,12 @@ class Judgment(BaseModel, validate_assignment=True):
     party: Optional[list[Party]]
 
 
-#     file_reference_id: Indexed(str) = None
-
-
 class Lawyer(Document, validate_assignment=True):
     name: Indexed(str) = None
     now_lic_no: Indexed(str) = None
     court: list[str]
     guild_name: list[str]
-    office: str
+    office: Indexed(str) = None
 
 
 class Guild(BaseModel, validate_assignment=True):
@@ -55,8 +52,7 @@ class Guild(BaseModel, validate_assignment=True):
 
 class LawyerData(BaseModel, validate_assignment=True):
     lawyers: list[Lawyer]
-    # TODO (@vivy) check/fill the correct type of courtMap? may not be a str
-    courtMap: list[str]  # [] # example ???
+    # courtMap: [] # always a empty list
     guildMap: list[list[str]]  # e.g. [['台北律師公會', 7195]]
 
     @validator("guildMap")
