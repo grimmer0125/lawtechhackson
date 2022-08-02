@@ -1,7 +1,38 @@
 from requests import post
-# from  import
 
 from env import DroidTownSettings
+
+# 法學院查詢系統
+# https://law.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=SLDV%2c110%2c%e7%b0%a1%e8%81%b2%e6%8a%97%2c19%2c20210929%2c1
+# 感覺是
+# 1. 簡易庭(可對簡易廷抗告，會成為第二筆同一字號簡易庭)
+# 2. -> 地方法院 (對其抗告就是到高等法院)
+# 3. -> 高等法院 -> 最高法院
+# 更x審，就是退回到下級再審
+# p.s. 法院網站現在除了內文，右邊也會有智慧小幫手列出內文用到的法條 (跟 lawsnote 差不多)
+#    ，也會有歷審裁判 (判決書會提到前一審編號，現在是初審右邊幫手會列出後幾審的編號)
+# e.g.
+# repo 裡存的 lawsnote/droidtown example (2021, 簡聲抗, 19, 士林)　對應到的法院頁面: https://bit.ly/3vyOcdC
+# 下面 https://github.com/Droidtown/LawsDocAssistant_tw 對應到的　https://bit.ly/3SmVmLK
+
+# lawsnote 的資料介紹
+# https://docs.google.com/document/d/1DJ2jfxb-1eh3pIdiAvCNkUHbp80gYNmqT0sojRJxdwE/edit#
+# 它的 relatedIssues
+# 1. 判決主文內找出來的
+
+# Droidtown
+# https://api.droidtown.co/document/#Addons_3 laws api
+# https://github.com/Droidtown/LawsDocAssistant_tw laws api 使用 example
+# 1. 要先將內文送至 https://api.droidtown.co/Articut/API/ 進行斷詞
+# 2. 將斷詞結果送至 https://api.droidtown.co/Articut/Toolkit/Laws/ 取得法律相關條文
+# 3. 會從主文(內文) 找出
+#    法條索引 (好像法院的比較準), 刑責，事件參照(目前網頁上的例子都是空的)
+### droidtown ai 部份:
+# https://github.com/Droidtown/LeA/
+###　它的資料集就是給斷詞後的結果
+# relatedIssues法條, party 等都跟 lawsnote 一樣 (可能是統一制定).
+#   但 lawsnote judgement/opionion 是給原始全文,
+#   但它 judgement/opionion 是給斷詞後的結果 -> 所以檔案從 14K 變成 416KB
 
 
 def main():
@@ -12,10 +43,10 @@ def main():
         # 若您是使用 Docker 版本，無須填入 username, api_key 參數
         "username":
         setting.
-        username,  # 這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        droid_username,  # 這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
         "api_key":
         setting.
-        api_key,  # 這裡填入您在 https://api.droidtown.co 登入後取得的 Api_Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        droid_api_key,  # 這裡填入您在 https://api.droidtown.co 登入後取得的 Api_Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
         "result_pos": [
             "<ENTITY_nouny>被告</ENTITY_nouny><MODIFIER>前</MODIFIER><FUNC_inter>因</FUNC_inter><MODIFIER>非法</MODIFIER><ACTION_verb>持有</ACTION_verb><ENTITY_nouny>槍械</ENTITY_nouny>",
             "，",
