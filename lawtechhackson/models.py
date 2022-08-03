@@ -29,6 +29,11 @@ class Party(BaseModel):
 ## TODO: (nice to have) 存律師資料 Lawyer 到 DB 時就去找說到底有沒有同名的律師
 
 
+class LawIssue(Document, validate_assignment=True):
+    """ a helper class: 幫助我們知道 dataset 裡到底有那些法條 """
+    name: str = ""
+
+
 ## 此為整理的資料
 # 律師1w/事務所+判決w/date(或許加上公會地區)+判斷種類
 # 律師2w/事務所+判決w/date(或許加上公會地區+判斷種類
@@ -51,7 +56,7 @@ class JudgmentVictoryLawyerInfo(BaseModel, validate_assignment=True):
 # 事務所資訊? ps. # 律師+事務所才是律師唯一性? 地區(公會名字)可以參考
 # 引用法
 ####
-class Judgment(BaseModel, validate_assignment=True):
+class Judgment(Document, validate_assignment=True):
     """ use lawsnote as reference first """
     court: str
     date: str
@@ -61,12 +66,12 @@ class Judgment(BaseModel, validate_assignment=True):
     # long
     # judgement: str
     # ref: https://www.legis-pedia.com/article/lawABC/749
-    type: str  # 判決或裁定
-    historyHash: str
-    mainText: str
+    type: Optional[str]  # 判決或裁定
+    historyHash: Optional[str]
+    mainText: Optional[str]
     # long, is included in judgement
-    # opinion: str
-    relatedIssues: list[RelatedIssue]
+    # opinion: Optional[str]
+    relatedIssues: list[RelatedIssue]  # reason: 支付命令. 的話可能這裡會是空的
     attachAsJudgement: Optional[str]  # url
     attachments: Optional[list[Attachment]]
     party: list[Party]
