@@ -26,15 +26,19 @@ pickle_list = [
     "law_data_Taoyuan.pickle",
 ]
 
+lawyer_dict = {}
+
 
 async def main():
     setting = DataBaseSettings()
 
-    await init_mongo(setting.mongo_connect_str, "test", [Lawyer])
+    await init_mongo(setting.mongo_connect_str, "test3", [Lawyer])
 
     print(f"start to load pickle to db")
     lawyer_folder = "./sample_data/lawyer_info_from_crawler"
     for file_name in pickle_list:
+        # if file_name != "law_data_taipei.pickle":
+        #     continue
         print(f"file_name:{file_name}")
         path = os.path.join(lawyer_folder, file_name)
         with (open(path, "rb")) as f:
@@ -46,6 +50,16 @@ async def main():
                 lawyers = lawyerData.lawyers
                 for lawyer in lawyers:
                     count += 1
+                    name = lawyer.name
+                    if name not in lawyer_dict:
+                        lawyer_dict[name] = lawyer
+                    else:
+                        s_lawyer = lawyer_dict[name]
+                        log = f"find:{name}.s_n:{s_lawyer.now_lic_no}. new:${lawyer.now_lic_no}"
+                        print(f"{log}")
+                        with open("sample.txt", "a") as file_object:
+                            # Append 'hello' at the end of file
+                            file_object.write(log)
                     await lawyer.insert()
                     print(f"{count}")
 
