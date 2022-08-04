@@ -129,8 +129,10 @@ class Lawyer(Document, validate_assignment=True):
     office: Indexed(str) = None
     ## stat info fields from JudgmentVictoryLawyerInfo
     # victory_count: int = 0
-    litigate_count: int = 0  # total
-    defeated_count: int = 0
+    litigate_judgment_total: int = 0  # total
+    defeated_judgment_count: int = 0
+    litigate_ruling_total: int = 0  # total
+    defeated_ruling_count: int = 0
 
 
 class Guild(BaseModel, validate_assignment=True):

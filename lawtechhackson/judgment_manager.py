@@ -1,7 +1,7 @@
-from constants import Court, LawType
+from constants import Court, LawType, JudgmentType
 from env import DatasetSettings, DataBaseSettings
 from lawtechhackson.models import JudgmentVictoryLawyerInfo
-from models import Judgment, LawIssue
+from models import Judgment, LawIssue, Lawyer
 import json
 from typing import Any
 import os
@@ -25,11 +25,27 @@ async def load_issue_to_db(judgment: Judgment):
             await law_issue.save()
 
 
-async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str):
-    ## 還是來看有沒有重複的好了 !!!
-    # TODO:
-    # 如果律師是 unique 的，裡面就直接 update laywer 欄位, 不是就??
-    pass
+async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str,
+                                 judgmentType: JudgmentType):
+    # 如果律師是 unique 的，裡面就直接 update laywer 欄位,
+    #  TODO: 同名的還沒想好怎麼辦
+    lawyer_list = await Lawyer.find(Lawyer.name == laywyer_name).to_list()
+    if len(lawyer_list) > 0:
+        print("find out laywer")
+        if len(lawyer_list) == 1:
+            print("update lawyer !!")
+            lawyer = lawyer_list[0]
+            if judgmentType == JudgmentType.Judgment:
+                lawyer.litigate_judgment_total += 1
+                if is_defeated:
+                    lawyer.defeated_judgment_count += 1
+            else:
+                lawyer.litigate_ruling_total += 1
+                if is_defeated:
+                    lawyer.defeated_ruling_count += 1
+
+        else:
+            print("more than 1 lawyer !!!")
 
 
 def find_domain(judgment: Judgment):
@@ -148,7 +164,7 @@ async def read_file(dataset_folder, court: Court, law: LawType,
 async def main():
     settings = DatasetSettings()
     db_setting = DataBaseSettings()
-    await init_mongo(db_setting.mongo_connect_str, "test", [LawIssue])
+    await init_mongo(db_setting.mongo_connect_str, "test3", [LawIssue, Lawyer])
 
     # NOTE: first test file
     # file_name = "民事裁定_110,簡聲抗,19_2021-09-29.json"
