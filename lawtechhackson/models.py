@@ -13,6 +13,47 @@ class Attachment(BaseModel, validate_assignment=True):
     fileUrl: str
 
 
+# {
+#      "group": [
+#          "plaintiff",
+#          "agentAdLitem",
+#          "lawyer"
+#      ],
+#      "title": "訴訟代理人",
+#      "value": "陳和貴律師"
+#  },
+
+# {
+#     "group": [
+#         "plaintiff",
+#         "agentAdLitem",
+#         "lawyer"
+#     ],
+#     "title": "前列二人共同訴訟代理人",
+#     "value": "李聖隆律師"
+# },
+
+# {
+#     "group": [
+#         "defendant",
+#         "agentAdLitem",
+#         "lawyer"
+#     ],
+#     "title": "訴訟代理人",
+#     "value": "王敬堯律師"
+# },
+
+# {
+#     "group": [
+#         "defendant",
+#         "agentAdLitem",
+#         "lawyer"
+#     ],
+#     "title": "複代理人",
+#     "value": "劉雅雲律師"
+# },
+
+
 class Party(BaseModel):
     # [plaintiff 原告, agentAdLitem 訴訟代理人, defendant, 被告, lawyer 律師]
     group: list[str]
@@ -40,7 +81,7 @@ class LawIssue(Document, validate_assignment=True):
 class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
     # TODO: 整理用 mainText　裡的關鍵字來判斷
     is_defeated: bool = False
-    guild_name: Optional[str]
+    # guild_name: Optional[str]  # 公會
     judgment_no: str
     judgment_date: str
     court: str

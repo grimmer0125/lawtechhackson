@@ -1,12 +1,13 @@
 from constants import Court, LawType
 from env import DatasetSettings, DataBaseSettings
-from lawtechhackson.models import Lawyer, JudgmentVictoryLawyerInfo
+from lawtechhackson.models import JudgmentVictoryLawyerInfo
 from models import Judgment, LawIssue
 import json
 from typing import Any
 import os
 import asyncio
 from db_manager import init_mongo
+from pydantic import BaseModel
 
 
 # English dict ref:
@@ -24,7 +25,8 @@ async def load_issue_to_db(judgment: Judgment):
             await law_issue.save()
 
 
-async def count_laywer_stat_info():
+async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str):
+    ## 還是來看有沒有重複的好了 !!!
     # TODO:
     # 如果律師是 unique 的，裡面就直接 update laywer 欄位, 不是就??
     pass
@@ -36,16 +38,33 @@ def find_domain(judgment: Judgment):
     return ""
 
 
-def find_lawyer(judgment: Judgment):
-    # TODO:
-    for party in judgment.party:
-        pass
+# class LawyerGroup(BaseModel, validate_assignment=True):
+#     lawyer_name = ""
+#     group = ""
 
-    return [""]
+
+def find_lawyers(judgment: Judgment):
+    group_lawyer_list = []
+    for party in judgment.party:
+        group = party.group
+        # title = party.title
+        value = party.value
+        if "lawyer" in group:
+            lawyer_name = value
+            if "plaintiff" in group:
+                group = "plaintiff"
+            else:
+                group = "defendant"
+            # law = LawyerGroup(lawyer_name=lawyer_name, group=group)
+            group_lawyer_list.append({
+                "group": group,
+                "lawyer_name": lawyer_name
+            })
+    return group_lawyer_list
 
 
 async def find_victory(judgment: Judgment):
-    # TODO: detect it is victory or defeat
+    # TODO: test: detect it is victory or defeat
 
     # 民事:
     # - 被告應給付$$$元 (不一定)
@@ -63,20 +82,26 @@ async def find_victory(judgment: Judgment):
         # TODO: handle LawType.Criminal later
         pass
 
-    lawyers = find_lawyer(judgment)
-    domain = find_domain(judgment)
-    guild_name = ""  #?
+    group_lawyer_list = find_lawyers(judgment)
 
-    for laywyer in lawyers:
-        lawyerInfo = JudgmentVictoryLawyerInfo(lawyer_name=laywyer,
-                                               judgment_no=judgment.no,
-                                               judgment_date=judgment.date,
-                                               court=judgment.court,
-                                               type=judgment.type,
-                                               domain=domain,
-                                               guild_name=guild_name)
-        await lawyerInfo.insert()
-        await count_laywer_stat_info()
+    # TODO:　等先一輪 load_issue_to_db 後，再來回來補填這塊
+    # domain = find_domain(judgment)
+
+    for group_lawyer in group_lawyer_list:
+        laywyer_name = group_lawyer["laywyer_name"]
+        group = group_lawyer["group"]
+        lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
+            lawyer_name=laywyer_name,
+            judgment_no=judgment.no,
+            judgment_date=judgment.date,
+            court=judgment.court,
+            type=judgment.type)
+
+        await lawyerVictoryInfo.insert()
+        if group == "plaintiff":
+            await count_laywer_stat_info(is_defeated, laywyer_name)
+        else:
+            await count_laywer_stat_info(not is_defeated, laywyer_name)
 
 
 async def load_file(path: str):
