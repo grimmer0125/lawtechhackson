@@ -1,5 +1,6 @@
 from constants import Court, LawType
 from env import DatasetSettings, DataBaseSettings
+from lawtechhackson.models import Lawyer, JudgmentVictoryLawyerInfo
 from models import Judgment, LawIssue
 import json
 from typing import Any
@@ -23,10 +24,16 @@ async def load_issue_to_db(judgment: Judgment):
             await law_issue.save()
 
 
-def find_domain():
+async def count_laywer_stat_info():
+    # TODO:
+    # 如果律師是 unique 的，裡面就直接 update laywer 欄位, 不是就??
+    pass
+
+
+def find_domain(judgment: Judgment):
     # TODO:
     # NOTE: 刑事犯罪這個類別還滿大的
-    pass
+    return ""
 
 
 def find_lawyer(judgment: Judgment):
@@ -34,8 +41,10 @@ def find_lawyer(judgment: Judgment):
     for party in judgment.party:
         pass
 
+    return [""]
 
-def find_victory(judgment: Judgment):
+
+async def find_victory(judgment: Judgment):
     # TODO: detect it is victory or defeat
 
     # 民事:
@@ -45,14 +54,29 @@ def find_victory(judgment: Judgment):
     # - 被告處有期徒刑xx(多久）
     # - 被告無罪
 
+    is_defeated = False
     if judgment.sys == LawType.Civil:
         mainText = judgment.mainText
         if "駁回。" in mainText:
-            pass
-        else:
-            pass
+            is_defeated = True
     else:
+        # TODO: handle LawType.Criminal later
         pass
+
+    lawyers = find_lawyer(judgment)
+    domain = find_domain(judgment)
+    guild_name = ""  #?
+
+    for laywyer in lawyers:
+        lawyerInfo = JudgmentVictoryLawyerInfo(lawyer_name=laywyer,
+                                               judgment_no=judgment.no,
+                                               judgment_date=judgment.date,
+                                               court=judgment.court,
+                                               type=judgment.type,
+                                               domain=domain,
+                                               guild_name=guild_name)
+        await lawyerInfo.insert()
+        await count_laywer_stat_info()
 
 
 async def load_file(path: str):
@@ -60,6 +84,7 @@ async def load_file(path: str):
         json_data = json.load(f)
         judgment = Judgment(**json_data)
         await load_issue_to_db(judgment)
+        await find_victory(judgment)
 
 
 async def read_files(dataset_folder, court: Court, law: LawType):

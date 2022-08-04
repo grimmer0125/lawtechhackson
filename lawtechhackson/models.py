@@ -37,15 +37,17 @@ class LawIssue(Document, validate_assignment=True):
 ## 此為整理的資料
 # 律師1w/事務所+判決w/date(或許加上公會地區)+判斷種類
 # 律師2w/事務所+判決w/date(或許加上公會地區+判斷種類
-class JudgmentVictoryLawyerInfo(BaseModel, validate_assignment=True):
+class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
     # TODO: 整理用 mainText　裡的關鍵字來判斷
-    is_victory: bool = False
+    is_defeated: bool = False
     guild_name: Optional[str]
     judgment_no: str
     judgment_date: str
     court: str
     # TODO:　整理那些法條對應到那個 domain
-    domain: str  # 刑事專長等等
+    domain: str = ""  # 刑事專長等等
+    lawyer_name: str
+    type: str
 
 
 ## 原始資料
@@ -66,7 +68,7 @@ class Judgment(Document, validate_assignment=True):
     # long
     # judgement: str
     # ref: https://www.legis-pedia.com/article/lawABC/749
-    type: Optional[str]  # 判決或裁定
+    type: str = ""  # 判決或裁定
     historyHash: Optional[str]
     mainText: Optional[str]
     # long, is included in judgement
@@ -85,7 +87,8 @@ class Lawyer(Document, validate_assignment=True):
     guild_name: list[str]
     office: Indexed(str) = None
     ## stat info fields from JudgmentVictoryLawyerInfo
-    victory_count: int = 0
+    # victory_count: int = 0
+    litigate_count: int = 0  # total
     defeated_count: int = 0
 
 
