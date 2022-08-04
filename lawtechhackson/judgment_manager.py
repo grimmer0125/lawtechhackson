@@ -1,4 +1,4 @@
-from constants import Court, LawType, JudgmentType
+from constants import Court, LawType, JudgmentType, PartyGroup
 from env import DatasetSettings, DataBaseSettings
 from lawtechhackson.models import JudgmentVictoryLawyerInfo
 from models import Judgment, LawIssue, Lawyer
@@ -61,16 +61,22 @@ def find_domain(judgment: Judgment):
 
 def find_lawyers(judgment: Judgment):
     group_lawyer_list = []
-    for party in judgment.party:
+    for i, party in enumerate(judgment.party):
         group = party.group
         # title = party.title
         value = party.value
-        if "lawyer" in group:
+        if PartyGroup.lawyer in group:  # or agentAdLitem
             lawyer_name = value
-            if "plaintiff" in group:
-                group = "plaintiff"
+            if PartyGroup.plaintiff in group and PartyGroup.defendant in group:
+                pre_party = judgment.party[i - 1]
+                if PartyGroup.plaintiff in pre_party.group:
+                    group = PartyGroup.plaintiff
+                else:
+                    group = PartyGroup.defendant
+            elif PartyGroup.plaintiff in group:
+                group = PartyGroup.plaintiff
             else:
-                group = "defendant"
+                group = PartyGroup.defendant
             # law = LawyerGroup(lawyer_name=lawyer_name, group=group)
             group_lawyer_list.append({
                 "group": group,

@@ -22,5 +22,12 @@ class JudgmentType(StrEnum):
     Ruling = "判決"
 
 
+class PartyGroup(StrEnum):
+    plaintiff = "plaintiff"
+    defendant = "defendant"
+    lawyer = "lawyer"
+    agentAdLitem = "agentAdLitem"
+
+
 def c(str1, str2):
     return f"{str1}_{str2}"
