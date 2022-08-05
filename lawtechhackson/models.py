@@ -75,7 +75,7 @@ class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
     is_defeated: bool = False
     # guild_name: Optional[str]  # 公會
     judgment_no: str
-    judgment_date: str
+    judgment_date: datetime  # = Field(format="date-time")
     court: str
     domain: str = ""  # 刑事專長等等
     lawyer_name: str
@@ -90,8 +90,9 @@ class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
 ####
 class Judgment(Document, validate_assignment=True):
     """ use lawsnote as reference first """
+    file_uri: str = ""
     court: str
-    date: str = Field(format="date-time")
+    date: datetime  #str = Field(format="date-time")
     no: str
     sys: str
     reason: str
@@ -99,16 +100,16 @@ class Judgment(Document, validate_assignment=True):
     # judgement: str
     # ref: https://www.legis-pedia.com/article/lawABC/749
     type: str = ""  # 判決或裁定
-    historyHash: Optional[str]
-    mainText: Optional[str]
+    historyHash: str = ""
+    mainText: str = ""
     # long, is included in judgement
     # opinion: Optional[str]
     relatedIssues: list[RelatedIssue]  # reason: 支付命令. 的話可能這裡會是空的
-    attachAsJudgement: Optional[str]  # url
-    attachments: Optional[list[Attachment]]
+    attachAsJudgement: str = ""  # url
+    attachments: list[Attachment] = []
     party: list[Party]
 
-    @validator("date")
+    @validator("date", pre=True)
     def set_date(cls, v):
         return datetime.fromisoformat(v)
 

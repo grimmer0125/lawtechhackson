@@ -2,6 +2,7 @@ import json
 from typing import Any
 import os
 import asyncio
+import pathlib
 from pydantic import BaseModel
 from lawtechhackson.constants import Court, LawType, JudgmentType, PartyGroup
 from lawtechhackson.env import DatasetSettings, DataBaseSettings
@@ -37,9 +38,9 @@ async def update_laywer_stat_info(is_defeated: bool, laywyer_name: str,
 
     lawyer_list = await Lawyer.find(Lawyer.name == laywyer_name).to_list()
     if len(lawyer_list) > 0:
-        print("find out laywer")
+        # print("find out laywer")
         if len(lawyer_list) == 1:
-            print("update only this lawyer!!")
+            # print("update only this lawyer!!")
             lawyer = lawyer_list[0]
 
             ## reset in case the previous parsing fail and clean some interrupted data
@@ -59,7 +60,7 @@ async def update_laywer_stat_info(is_defeated: bool, laywyer_name: str,
                 if is_defeated:
                     lawyer.defeated_ruling_count += 1
             await lawyer.save()
-            print("update lawyer ok")
+            # print("update lawyer ok")
 
         else:
             print("more than 1 lawyer !!!")
@@ -72,33 +73,57 @@ def find_domain(judgment: Judgment):
 
 
 # class LawyerGroup(BaseModel, validate_assignment=True):
-#     lawyer_name = ""
+#     lawyer = ""
 #     group = ""
+
+from enum import auto
+
+from strenum import StrEnum
+
+
+class Key(StrEnum):
+    group = auto()
+    lawyer_name = auto()
 
 
 def find_lawyers(judgment: Judgment):
     # TODO(test)
     group_lawyer_list = []
+    special_case = ""
     for i, party in enumerate(judgment.party):
         group = party.group
-        # title = party.title
+        title = party.title
         value = party.value
+        # case0:  原告+被告
+        # case1: "反訴原告"+"反訴被告"
+        # case2  反反訴: 原告即反訴被告+被告即反訴原告 https://www.facebook.com/437195293064003/posts/2134684499981732/
+
+        if title.startswith("原告") or title.startswith(
+                "反訴原告") or title.startswith("原告即反訴被告"):
+            special_case = PartyGroup.plaintiff
+        #elif title == "反訴被告":
+        elif title.startswith("被告") or title.startswith(
+                "反訴被告") or title.startswith("被告即反訴原告"):
+            special_case = PartyGroup.defendant
         if PartyGroup.lawyer in group:  # or agentAdLitem
             lawyer_name = value
             if PartyGroup.plaintiff in group and PartyGroup.defendant in group:
-                pre_party = judgment.party[i - 1]
-                if PartyGroup.plaintiff in pre_party.group:
-                    group = PartyGroup.plaintiff
-                else:
-                    group = PartyGroup.defendant
+                # TODO(test): special case
+                # pre_party = judgment.party[i - 1]
+                # if special_case == "反訴原告":  #PartyGroup.plaintiff in pre_party.group:
+                # group = PartyGroup.plaintiff
+                # else:
+                # group = PartyGroup.defendant
+                group = special_case
+                print(f"反訴case:{judgment.file_uri}")
             elif PartyGroup.plaintiff in group:
                 group = PartyGroup.plaintiff
             else:
                 group = PartyGroup.defendant
-            # law = LawyerGroup(lawyer_name=lawyer_name, group=group)
+            # lawGroup = LawyerGroup(lawyer=lawyer_name, group=group)
             group_lawyer_list.append({
-                "group": group,
-                "lawyer_name": lawyer_name
+                Key.group: group,
+                Key.lawyer_name: lawyer_name
             })
     return group_lawyer_list
 
@@ -117,6 +142,8 @@ async def parse_judgment(judgment: Judgment):
     is_defeated = False
     if judgment.sys == LawType.Civil:
         mainText = judgment.mainText
+        # TODO: 特別 case, 部份勝訴?: 原告其餘之訴駁回。\n訴訟費用新臺幣壹仟元，由被告連帶負擔百分之
+        # 四十三即新臺幣肆伯參拾元，餘由原告負擔。\n本判決原告勝訴部分，
         if "駁回。" in mainText:
             is_defeated = True
     else:
@@ -129,10 +156,11 @@ async def parse_judgment(judgment: Judgment):
     # domain = find_domain(judgment)
 
     for group_lawyer in group_lawyer_list:
-        laywyer_name = group_lawyer["laywyer_name"]
-        group = group_lawyer["group"]
+        laywyer_name = group_lawyer[Key.lawyer_name]
+        shortname = laywyer_name.replace("律師", "")
+        group = group_lawyer[Key.group]
         lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
-            lawyer_name=laywyer_name,
+            lawyer_name=shortname,
             judgment_no=judgment.no,
             judgment_date=judgment.date,
             court=judgment.court,
@@ -140,10 +168,10 @@ async def parse_judgment(judgment: Judgment):
 
         await lawyerVictoryInfo.insert()
         if group == PartyGroup.plaintiff:
-            await update_laywer_stat_info(is_defeated, laywyer_name,
+            await update_laywer_stat_info(is_defeated, shortname,
                                           judgment.type)
         else:
-            await update_laywer_stat_info(not is_defeated, laywyer_name,
+            await update_laywer_stat_info(not is_defeated, shortname,
                                           judgment.type)
 
 
@@ -151,6 +179,7 @@ async def load_file(path: str):
     with open(path) as f:
         json_data = json.load(f)
         judgment = Judgment(**json_data)
+        judgment.file_uri = pathlib.Path(path).stem
         await judgment.insert()
         # insert LawIssue
         await load_issue_to_db(judgment)
@@ -171,7 +200,8 @@ async def read_files(dataset_folder, court: Court, law: LawType):
             file_count += 1
             file_path = os.path.join(root, file_name)
             await load_file(file_path)
-            print(f"read:{file_count}")
+            if file_count % 100 == 0:
+                print(f"read:{file_count}")
         print("end to read files")
 
 
@@ -195,7 +225,8 @@ async def read_file(dataset_folder, court: Court, law: LawType,
 async def main():
     settings = DatasetSettings()
     db_setting = DataBaseSettings()
-    await init_mongo(db_setting.mongo_connect_str, "test3", [LawIssue, Lawyer])
+    await init_mongo(db_setting.mongo_connect_str, "test3",
+                     [JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer])
 
     # NOTE: first test file
     # file_name = "民事裁定_110,簡聲抗,19_2021-09-29.json"

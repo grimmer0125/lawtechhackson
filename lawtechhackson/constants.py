@@ -18,8 +18,8 @@ class LawType(StrEnum):
 
 
 class JudgmentType(StrEnum):
-    Judgment = "裁定"
-    Ruling = "判決"
+    Judgment = "判決"
+    Ruling = "裁定"
 
 
 class PartyGroup(StrEnum):
