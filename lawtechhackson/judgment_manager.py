@@ -85,7 +85,7 @@ def find_lawyers(judgment: Judgment):
     return group_lawyer_list
 
 
-async def find_victory(judgment: Judgment):
+async def parse_judgment(judgment: Judgment):
     # TODO: test: detect it is victory or defeat
 
     # 民事:
@@ -131,7 +131,7 @@ async def load_file(path: str):
         json_data = json.load(f)
         judgment = Judgment(**json_data)
         await load_issue_to_db(judgment)
-        await find_victory(judgment)
+        await parse_judgment(judgment)
 
 
 async def read_files(dataset_folder, court: Court, law: LawType):
