@@ -22,11 +22,14 @@ async def load_issue_to_db(judgment: Judgment):
         if await LawIssue.find_one(LawIssue.name == lawName) == None:
             law_issue = LawIssue(name=lawName)
             # write to DB
-            await law_issue.save()
+            await law_issue.insert()
 
 
-async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str,
-                                 judgmentType: JudgmentType):
+lawyer_dict = {}
+
+
+async def update_laywer_stat_info(is_defeated: bool, laywyer_name: str,
+                                  judgmentType: str):
     # 如果律師是 unique 的，裡面就直接 update laywer 欄位,
     #  TODO: 同名的還沒想好怎麼辦
     ## NOTE:
@@ -37,8 +40,17 @@ async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str,
     if len(lawyer_list) > 0:
         print("find out laywer")
         if len(lawyer_list) == 1:
-            print("update lawyer !!")
+            print("update only this lawyer!!")
             lawyer = lawyer_list[0]
+
+            ## reset in case the previous parsing fail and clean some interrupted data
+            if laywyer_name not in lawyer_dict:
+                lawyer_dict[laywyer_name] = 1
+                lawyer.litigate_judgment_total = 0
+                lawyer.defeated_judgment_count = 0
+                lawyer.litigate_ruling_total = 0
+                lawyer.defeated_ruling_count = 0
+
             if judgmentType == JudgmentType.Judgment:
                 lawyer.litigate_judgment_total += 1
                 if is_defeated:
@@ -47,6 +59,8 @@ async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str,
                 lawyer.litigate_ruling_total += 1
                 if is_defeated:
                     lawyer.defeated_ruling_count += 1
+            await lawyer.save()
+            print("update lawyer ok")
 
         else:
             print("more than 1 lawyer !!!")
@@ -126,23 +140,29 @@ async def parse_judgment(judgment: Judgment):
             type=judgment.type)
 
         await lawyerVictoryInfo.insert()
-        if group == "plaintiff":
-            await count_laywer_stat_info(is_defeated, laywyer_name)
+        if group == PartyGroup.plaintiff:
+            await update_laywer_stat_info(is_defeated, laywyer_name,
+                                          judgment.type)
         else:
-            await count_laywer_stat_info(not is_defeated, laywyer_name)
+            await update_laywer_stat_info(not is_defeated, laywyer_name,
+                                          judgment.type)
 
 
 async def load_file(path: str):
     with open(path) as f:
         json_data = json.load(f)
         judgment = Judgment(**json_data)
+        await judgment.insert()
+        # insert LawIssue
         await load_issue_to_db(judgment)
+        # insert JudgmentVictoryLawyerInfo & update laywer
         await parse_judgment(judgment)
 
 
 async def read_files(dataset_folder, court: Court, law: LawType):
     court_folder = f"{court}_{law}"
     folder_path = os.path.join(dataset_folder, court_folder)
+    # total 478954: 台北士林民事
     file_count = 0
     for root, directories, files in os.walk(folder_path):
         print("start to read files")
