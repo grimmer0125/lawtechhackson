@@ -1,13 +1,12 @@
-from constants import Court, LawType, JudgmentType, PartyGroup
-from env import DatasetSettings, DataBaseSettings
-from lawtechhackson.models import JudgmentVictoryLawyerInfo
-from models import Judgment, LawIssue, Lawyer
 import json
 from typing import Any
 import os
 import asyncio
-from db_manager import init_mongo
 from pydantic import BaseModel
+from lawtechhackson.constants import Court, LawType, JudgmentType, PartyGroup
+from lawtechhackson.env import DatasetSettings, DataBaseSettings
+from lawtechhackson.db_manager import init_mongo
+from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer
 
 
 # English dict ref:
