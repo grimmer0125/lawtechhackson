@@ -29,6 +29,10 @@ async def count_laywer_stat_info(is_defeated: bool, laywyer_name: str,
                                  judgmentType: JudgmentType):
     # 如果律師是 unique 的，裡面就直接 update laywer 欄位,
     #  TODO: 同名的還沒想好怎麼辦
+    ## NOTE:
+    # 如果無法徹底判斷是那個律師(同名 case), 加上有找到兩個律師，到時 ui 就 show 不一定?
+    # 不過就算只有一筆那律師的判決，也可能是把 a,b 律師搞混(其中一律師沒有參加過判決)
+
     lawyer_list = await Lawyer.find(Lawyer.name == laywyer_name).to_list()
     if len(lawyer_list) > 0:
         print("find out laywer")
@@ -60,6 +64,7 @@ def find_domain(judgment: Judgment):
 
 
 def find_lawyers(judgment: Judgment):
+    # TODO(test)
     group_lawyer_list = []
     for i, party in enumerate(judgment.party):
         group = party.group
@@ -86,7 +91,7 @@ def find_lawyers(judgment: Judgment):
 
 
 async def parse_judgment(judgment: Judgment):
-    # TODO: test: detect it is victory or defeat
+    # TODO(test): detect it is victory or defeat
 
     # 民事:
     # - 被告應給付$$$元 (不一定)
@@ -95,6 +100,7 @@ async def parse_judgment(judgment: Judgment):
     # - 被告處有期徒刑xx(多久）
     # - 被告無罪
 
+    # TODO(test): 整理用 mainText　裡的關鍵字來判斷
     is_defeated = False
     if judgment.sys == LawType.Civil:
         mainText = judgment.mainText

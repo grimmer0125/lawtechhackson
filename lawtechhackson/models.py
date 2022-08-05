@@ -1,6 +1,7 @@
 from pydantic import BaseModel, BaseSettings, Field, validator, root_validator
 from typing import Optional, Tuple, Literal
 from beanie import Document, Indexed, init_beanie
+from datetime import datetime
 
 
 class RelatedIssue(BaseModel, validate_assignment=True):
@@ -62,14 +63,6 @@ class Party(BaseModel):
     value: str
 
 
-## TODO:
-# 律師的勝率需要時再另外定時計算。算完存在 Lawyer
-# 如果無法徹底判斷是那個律師(同名 case), 加上有找到兩個律師，到時 ui 就 show 不一定?
-# 不過就算只有一筆那律師的判決，也可能是把 a,b 律師搞混(其中一律師沒有參加過判決)
-
-## TODO: (nice to have) 存律師資料 Lawyer 到 DB 時就去找說到底有沒有同名的律師
-
-
 class LawIssue(Document, validate_assignment=True):
     """ a helper class: 幫助我們知道 dataset 裡到底有那些法條 """
     name: str = ""
@@ -79,13 +72,11 @@ class LawIssue(Document, validate_assignment=True):
 # 律師1w/事務所+判決w/date(或許加上公會地區)+判斷種類
 # 律師2w/事務所+判決w/date(或許加上公會地區+判斷種類
 class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
-    # TODO: 整理用 mainText　裡的關鍵字來判斷
     is_defeated: bool = False
     # guild_name: Optional[str]  # 公會
     judgment_no: str
     judgment_date: str
     court: str
-    # TODO:　整理那些法條對應到那個 domain
     domain: str = ""  # 刑事專長等等
     lawyer_name: str
     type: str
@@ -93,16 +84,14 @@ class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
 
 ## 原始資料
 # court (某種區域資訊)
-# TODO: date: 要轉換?
 # no+date才是唯一性?: 可以用 compound. 檔名就是(還有加上是否民事判定等)
-# TODO: 律師: 從 party 裡找,
-# 事務所資訊? ps. # 律師+事務所才是律師唯一性? 地區(公會名字)可以參考
+# x 事務所資訊? ps. # 律師+事務所才是律師唯一性? 地區(公會名字)可以參考
 # 引用法
 ####
 class Judgment(Document, validate_assignment=True):
     """ use lawsnote as reference first """
     court: str
-    date: str
+    date: str = Field(format="date-time")
     no: str
     sys: str
     reason: str
@@ -118,6 +107,10 @@ class Judgment(Document, validate_assignment=True):
     attachAsJudgement: Optional[str]  # url
     attachments: Optional[list[Attachment]]
     party: list[Party]
+
+    @validator("date")
+    def set_date(cls, v):
+        return datetime.fromisoformat(v)
 
 
 class Lawyer(Document, validate_assignment=True):
@@ -143,7 +136,7 @@ class Guild(BaseModel, validate_assignment=True):
 class LawyerData(BaseModel, validate_assignment=True):
     lawyers: list[Lawyer]
     # courtMap: [] # always a empty list
-    guildMap: list[list[str]]  # e.g. [['台北律師公會', 7195]]
+    guildMap: list[list[str]] = Field(format=Guild)  # e.g. [['台北律師公會', 7195]]
 
     @validator("guildMap")
     def set_guild(cls, v):
