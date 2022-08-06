@@ -89,37 +89,48 @@ class Key(StrEnum):
 def find_lawyers(judgment: Judgment):
     # TODO(test)
     group_lawyer_list = []
-    special_case = ""
+    current_group = ""
     for i, party in enumerate(judgment.party):
         group = party.group
         title = party.title
         value = party.value
         # case0:  原告+被告
-        # case1: "反訴原告"+"反訴被告"
-        # case2  反反訴: 原告即反訴被告+被告即反訴原告 https://www.facebook.com/437195293064003/posts/2134684499981732/
+        # case1:  反訴原告"+"反訴被告"
+        # case2   反反訴: 原告即反訴被告+被告即反訴原告 https://www.facebook.com/437195293064003/posts/2134684499981732/
+        # case4:  反反反: 上訴人即被告即反訴原告 (之前這 case 會找不到, 所以 special_case 會是 "" 所以會當成被告鎮營 --> 就算了)
+        #      or 上訴人即附帶被上訴人 即反訴被告 https://law.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TPHV%2c106%2c%e4%b8%8a%e6%98%93%2c622%2c20190130%2c1&ot=in
 
+        # 聲請人/抗告人 vs 相對人(group會是空的) <-還沒見過反訴的 case, 不過先列好了. 抗告人跟聲請人的定義?
+        #
         if title.startswith("原告") or title.startswith(
-                "反訴原告") or title.startswith("原告即反訴被告"):
-            special_case = PartyGroup.plaintiff
-        #elif title == "反訴被告":
+                "反訴原告") or title.startswith("上訴人") or title.startswith(
+                    "聲請人") or title.startswith(
+                        "抗告人"):  # title.startswith("原告即反訴被告") or
+            current_group = PartyGroup.plaintiff
         elif title.startswith("被告") or title.startswith(
-                "反訴被告") or title.startswith("被告即反訴原告"):
-            special_case = PartyGroup.defendant
+                "反訴被告") or title.startswith("被上訴人") or title.startswith(
+                    "相對人"):  # or title.startswith("被告即反訴原告")
+            current_group = PartyGroup.defendant
         if PartyGroup.lawyer in group:  # or agentAdLitem
             lawyer_name = value
-            if PartyGroup.plaintiff in group and PartyGroup.defendant in group:
+            if (PartyGroup.plaintiff in group and PartyGroup.defendant in group
+                ) or (
+                    PartyGroup.plaintiff not in
+                    group  # 有見過 group 全空 case 但還沒見過有律師但是是空的 case. 聲請人/抗告人之反訴?
+                    and PartyGroup.defendant not in group):
                 # TODO(test): special case
                 # pre_party = judgment.party[i - 1]
                 # if special_case == "反訴原告":  #PartyGroup.plaintiff in pre_party.group:
                 # group = PartyGroup.plaintiff
                 # else:
                 # group = PartyGroup.defendant
-                group = special_case
+                group = current_group
                 print(f"反訴case:{judgment.file_uri}")
             elif PartyGroup.plaintiff in group:
                 group = PartyGroup.plaintiff
-            else:
+            elif PartyGroup.defendant in group:
                 group = PartyGroup.defendant
+
             # lawGroup = LawyerGroup(lawyer=lawyer_name, group=group)
             group_lawyer_list.append({
                 Key.group: group,
@@ -144,7 +155,8 @@ async def parse_judgment(judgment: Judgment):
         mainText = judgment.mainText
         # TODO: 特別 case, 部份勝訴?: 原告其餘之訴駁回。\n訴訟費用新臺幣壹仟元，由被告連帶負擔百分之
         # 四十三即新臺幣肆伯參拾元，餘由原告負擔。\n本判決原告勝訴部分，
-        if "駁回。" in mainText:
+        # partial defeated/victory 當做沒有輸好了:
+        if "駁回。" in mainText and "勝訴" not in mainText:  # 之前這 case 當成 defeated 的就算了
             is_defeated = True
     else:
         # TODO: handle LawType.Criminal later
