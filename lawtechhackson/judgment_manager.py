@@ -89,7 +89,10 @@ class Key(StrEnum):
 def find_lawyers(judgment: Judgment):
     # TODO(test)
     group_lawyer_list = []
-    current_group = ""
+    # # or title.startswith("債務人"),
+    # 有看到 lawyer 裡沒有 plaintiff/defendant, 然後一開始的人 title 是債務人+沒有明顯被告 (但為了怕有債權人也是這種 case, 或是有債權人原告的 case,
+    # 只好設定成預設值)
+    current_group = PartyGroup.plaintiff
     for i, party in enumerate(judgment.party):
         group = party.group
         title = party.title
@@ -111,6 +114,7 @@ def find_lawyers(judgment: Judgment):
                 "反訴被告") or title.startswith("被上訴人") or title.startswith(
                     "相對人"):  # or title.startswith("被告即反訴原告")
             current_group = PartyGroup.defendant
+
         if PartyGroup.lawyer in group:  # or agentAdLitem
             lawyer_name = value
             if (PartyGroup.plaintiff in group and PartyGroup.defendant in group
