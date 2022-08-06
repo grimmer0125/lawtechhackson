@@ -57,7 +57,7 @@ async def main():
                         s_lawyer = lawyer_dict[name]
                         log = f"find:{name}.s_n:{s_lawyer.now_lic_no}. new:${lawyer.now_lic_no}"
                         print(f"{log}")
-                        with open("sample.txt", "a") as file_object:
+                        with open("duplicate_lawyer.txt", "a") as file_object:
                             # Append 'hello' at the end of file
                             file_object.write(log)
                     await lawyer.insert()
