@@ -123,7 +123,7 @@ def find_lawyers(judgment: Judgment):
                     group  # 有見過 group 全空 case 但還沒見過有律師但是是空的 case. 聲請人/抗告人之反訴?
                     and PartyGroup.defendant not in group):
                 group = current_group
-                print(f"反訴case:{judgment.file_uri}")
+                # print(f"反訴case:{judgment.file_uri}")
             elif PartyGroup.plaintiff in group:
                 group = PartyGroup.plaintiff
             elif PartyGroup.defendant in group:
@@ -146,6 +146,7 @@ async def add_lawyer_stat(is_defeated: bool, laywyer_name: str,
     else:
         lawyer_list = await Lawyer.find(Lawyer.name == laywyer_name).to_list()
         if len(lawyer_list) == 0:
+            # FIX: but it happened. no this in crawler data?
             print("should not be possible to find 0 lawyers")
         elif len(lawyer_list) == 1:
             lawyer = lawyer_list[0]
@@ -217,9 +218,14 @@ async def parse_judgment(judgment: Judgment):
     # TODO(pass):　等先一輪 load_issue_to_db 後，再來回來補填這塊
     # domain = find_domain(judgment)
 
+    lawyer_set = set()
     for group_lawyer in group_lawyer_list:
         laywyer_name = group_lawyer[Key.lawyer_name]
         shortname = laywyer_name.replace("律師", "")
+        if shortname not in lawyer_set:
+            lawyer_set.add(shortname)
+        else:
+            continue
         group = group_lawyer[Key.group]
 
         if group == PartyGroup.plaintiff:
@@ -249,7 +255,6 @@ async def parse_judgment(judgment: Judgment):
             JudgmentVictoryLawyerInfo.type == judgment.type,
             JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
         if len(lawyerVictoryInfos) == 0:
-            print("not found !!")
             ## TODO: create a one
             lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
                 file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
