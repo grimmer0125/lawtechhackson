@@ -1,5 +1,6 @@
 from ctypes import Union
 import json
+from operator import truediv
 from typing import Any, Union, Optional
 import os
 import asyncio
@@ -137,8 +138,8 @@ def find_lawyers(judgment: Judgment):
     return group_lawyer_list
 
 
-async def add_lawyer_stat(is_defeated: bool, laywyer_name: str,
-                          judgment: Judgment):
+async def fill_lawyer_stat(is_defeated: bool, laywyer_name: str,
+                           judgment: Judgment):
 
     stat: Optional[LawyerStat] = None
     if laywyer_name in lawyer_dict:
@@ -189,7 +190,10 @@ async def add_lawyer_stat(is_defeated: bool, laywyer_name: str,
     stat.win_rate = (stat.total_litigates -
                      stat.total_defeated_litigates) / stat.total_litigates
 
-    await stat.save()
+    # await stat.save()
+
+
+find = False
 
 
 async def parse_judgment(judgment: Judgment):
@@ -247,35 +251,36 @@ async def parse_judgment(judgment: Judgment):
         #         type=judgment.type)
         #     await lawyerVictoryInfo.insert()
         # else:
-        lawyerVictoryInfos = await JudgmentVictoryLawyerInfo.find(
-            JudgmentVictoryLawyerInfo.court == judgment.court,
-            JudgmentVictoryLawyerInfo.judgment_no == judgment.no,
-            JudgmentVictoryLawyerInfo.judgment_date == judgment.date,
-            # 應該不太可能不同type同一天出來吧? type 應該不太需要
-            JudgmentVictoryLawyerInfo.type == judgment.type,
-            JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
-        if len(lawyerVictoryInfos) == 0:
-            ## TODO: create a one
-            lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
-                file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
-                lawyer_name=shortname,
-                judgment_no=judgment.no,
-                judgment_date=judgment.date,
-                court=judgment.court,
-                type=judgment.type,
-                is_defeated=laywyer_is_defeated,  # 現存的資料存時沒有這行
-                sys=judgment.sys)  # 現存的資料存時沒有這行
-            await lawyerVictoryInfo.insert()
-        else:
-            if len(lawyerVictoryInfos) > 1:
-                print("more than one lawyerVictoryInfo")
-            lawyerVictoryInfo = lawyerVictoryInfos[0]
-            lawyerVictoryInfo.sys = judgment.sys
-            lawyerVictoryInfo.file_uri = judgment.file_uri
-            lawyerVictoryInfo.is_defeated = laywyer_is_defeated
-            await lawyerVictoryInfo.save()
+        if find:
+            lawyerVictoryInfos = await JudgmentVictoryLawyerInfo.find(
+                JudgmentVictoryLawyerInfo.court == judgment.court,
+                JudgmentVictoryLawyerInfo.judgment_no == judgment.no,
+                JudgmentVictoryLawyerInfo.judgment_date == judgment.date,
+                # 應該不太可能不同type同一天出來吧? type 應該不太需要
+                JudgmentVictoryLawyerInfo.type == judgment.type,
+                JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
+            if len(lawyerVictoryInfos) == 0:
+                ## TODO: create a one
+                lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
+                    file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
+                    lawyer_name=shortname,
+                    judgment_no=judgment.no,
+                    judgment_date=judgment.date,
+                    court=judgment.court,
+                    type=judgment.type,
+                    is_defeated=laywyer_is_defeated,  # 現存的資料存時沒有這行
+                    sys=judgment.sys)  # 現存的資料存時沒有這行
+                await lawyerVictoryInfo.insert()  #
+            else:
+                if len(lawyerVictoryInfos) > 1:
+                    print("more than one lawyerVictoryInfo")
+                lawyerVictoryInfo = lawyerVictoryInfos[0]
+                lawyerVictoryInfo.sys = judgment.sys
+                lawyerVictoryInfo.file_uri = judgment.file_uri
+                lawyerVictoryInfo.is_defeated = laywyer_is_defeated
+                await lawyerVictoryInfo.save()
 
-        await add_lawyer_stat(laywyer_is_defeated, shortname, judgment)
+        await fill_lawyer_stat(laywyer_is_defeated, shortname, judgment)
         # await update_laywer_stat_info(is_defeated, shortname,
         #                               judgment.type)
 
@@ -293,7 +298,22 @@ async def load_file(path: str):
         # await load_issue_to_db(judgment)
 
         # insert JudgmentVictoryLawyerInfo & update lawyerStat
-        await parse_judgment(judgment)
+
+    global find
+    if find is False and judgment.file_uri == "民事判決_100,士訴,2_2011-09-07":
+        find = True
+
+    await parse_judgment(judgment)
+
+
+async def save_stat_dict():
+    for stat in lawyer_stat_dict.values():
+        o_stat = await LawyerStat.find_one(
+            LawyerStat.name == stat.name,
+            LawyerStat.now_lic_no == stat.now_lic_no)
+        if o_stat is not None:
+            stat.id = o_stat.id
+        await stat.save()
 
 
 async def read_files(dataset_folder, court: Court, law: LawType):
@@ -312,6 +332,8 @@ async def read_files(dataset_folder, court: Court, law: LawType):
             if file_count % 100 == 0:
                 print(f"read:{file_count}")
         print("end to read files")
+
+    await save_stat_dict()
 
 
 async def read_file(dataset_folder, court: Court, law: LawType,
