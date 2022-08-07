@@ -142,7 +142,7 @@ async def fill_lawyer_stat(is_defeated: bool, laywyer_name: str,
                            judgment: Judgment):
 
     stat: Optional[LawyerStat] = None
-    if laywyer_name in lawyer_dict:
+    if laywyer_name in lawyer_stat_dict:
         stat = lawyer_stat_dict[laywyer_name]
     else:
         lawyer_list = await Lawyer.find(Lawyer.name == laywyer_name).to_list()
@@ -160,6 +160,8 @@ async def fill_lawyer_stat(is_defeated: bool, laywyer_name: str,
         return
 
     ## relatedIssues part
+    # if len(stat.law_issues) > 0:
+    #     print("bingo0")
     issue_set = set(stat.law_issues)
     for issue in judgment.relatedIssues:
         law_name = issue.lawName
@@ -168,6 +170,8 @@ async def fill_lawyer_stat(is_defeated: bool, laywyer_name: str,
     stat.law_issues = issue_list
 
     stat.total_litigates += 1
+    # if stat.total_litigates == 2:
+    #     print("bingo")
     if judgment.type == JudgmentType.Judgment:
         stat.judgment_count += 1
         if is_defeated:
@@ -251,7 +255,7 @@ async def parse_judgment(judgment: Judgment):
         #         type=judgment.type)
         #     await lawyerVictoryInfo.insert()
         # else:
-        if find:
+        if False:
             lawyerVictoryInfos = await JudgmentVictoryLawyerInfo.find(
                 JudgmentVictoryLawyerInfo.court == judgment.court,
                 JudgmentVictoryLawyerInfo.judgment_no == judgment.no,
@@ -307,6 +311,7 @@ async def load_file(path: str):
 
 
 async def save_stat_dict():
+    print("start save_stat_dict")
     for stat in lawyer_stat_dict.values():
         o_stat = await LawyerStat.find_one(
             LawyerStat.name == stat.name,
@@ -314,6 +319,7 @@ async def save_stat_dict():
         if o_stat is not None:
             stat.id = o_stat.id
         await stat.save()
+    print("end save_stat_dict")
 
 
 async def read_files(dataset_folder, court: Court, law: LawType):
