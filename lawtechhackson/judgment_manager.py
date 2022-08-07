@@ -285,12 +285,14 @@ async def load_file(path: str):
         json_data = json.load(f)
         judgment = Judgment(**json_data)
         judgment.file_uri = pathlib.Path(path).stem
-        await judgment.insert()
 
-        # insert LawIssue for analyzing
+        ## insert judgments
+        # await judgment.insert()
+
+        ## insert LawIssue for analyzing
         # await load_issue_to_db(judgment)
 
-        # insert JudgmentVictoryLawyerInfo & update laywer
+        # insert JudgmentVictoryLawyerInfo & update lawyerStat
         await parse_judgment(judgment)
 
 
