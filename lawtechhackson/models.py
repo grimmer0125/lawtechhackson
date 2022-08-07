@@ -168,10 +168,10 @@ class Lawyer(Document, validate_assignment=True):
     #### depreciated, 移到 LawyerStat ####
     ## stat info fields from JudgmentVictoryLawyerInfo
     # victory_count: int = 0
-    litigate_judgment_total: int = 0  # total
-    defeated_judgment_count: int = 0
-    litigate_ruling_total: int = 0  # total
-    defeated_ruling_count: int = 0
+    # litigate_judgment_total: int = 0  # total
+    # defeated_judgment_count: int = 0
+    # litigate_ruling_total: int = 0  # total
+    # defeated_ruling_count: int = 0
 
     class Settings:
         indexes = [[
