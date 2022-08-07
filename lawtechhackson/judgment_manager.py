@@ -14,8 +14,6 @@ from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue,
 # 1. https://www.judicial.gov.tw/tw/dl-58197-208aa7b4b75b4f4f891d27d7a86f6851.html
 # 2. https://www.judicial.gov.tw/tw/lp-1501-1.html
 # 3. http://www.ls.fju.edu.tw/doc/vocabulary/%E9%99%84%E4%BB%B6%E5%9B%9B%20%20%20%E6%B0%91%E4%BA%8B%E8%A8%B4%E8%A8%9F%E6%B3%95.pdf
-
-### 有些 todo 是寫在 models.py 裡 ###
 async def load_issue_to_db(judgment: Judgment):
     for issue in judgment.relatedIssues:
         lawName = issue.lawName
@@ -87,7 +85,6 @@ class Key(StrEnum):
 
 
 def find_lawyers(judgment: Judgment):
-    # TODO(test)
     group_lawyer_list = []
     # # or title.startswith("債務人"),
     # 有看到 lawyer 裡沒有 plaintiff/defendant, 然後一開始的人 title 是債務人+沒有明顯被告 (但為了怕有債權人也是這種 case, 或是有債權人原告的 case,
@@ -122,12 +119,6 @@ def find_lawyers(judgment: Judgment):
                     PartyGroup.plaintiff not in
                     group  # 有見過 group 全空 case 但還沒見過有律師但是是空的 case. 聲請人/抗告人之反訴?
                     and PartyGroup.defendant not in group):
-                # TODO(test): special case
-                # pre_party = judgment.party[i - 1]
-                # if special_case == "反訴原告":  #PartyGroup.plaintiff in pre_party.group:
-                # group = PartyGroup.plaintiff
-                # else:
-                # group = PartyGroup.defendant
                 group = current_group
                 print(f"反訴case:{judgment.file_uri}")
             elif PartyGroup.plaintiff in group:
@@ -144,8 +135,6 @@ def find_lawyers(judgment: Judgment):
 
 
 async def parse_judgment(judgment: Judgment):
-    # TODO(test): detect it is victory or defeat
-
     # 民事:
     # - 被告應給付$$$元 (不一定)
     # - m 判決結果 會寫原告之訴駁回 之類
@@ -153,11 +142,11 @@ async def parse_judgment(judgment: Judgment):
     # - 被告處有期徒刑xx(多久）
     # - 被告無罪
 
-    # TODO(test): 整理用 mainText　裡的關鍵字來判斷
+    # NOTE: 整理用 mainText　裡的關鍵字來判斷
     is_defeated = False
     if judgment.sys == LawType.Civil:
         mainText = judgment.mainText
-        # TODO: 特別 case, 部份勝訴?: 原告其餘之訴駁回。\n訴訟費用新臺幣壹仟元，由被告連帶負擔百分之
+        # NOTE: 特別 case, 部份勝訴?: 原告其餘之訴駁回。\n訴訟費用新臺幣壹仟元，由被告連帶負擔百分之
         # 四十三即新臺幣肆伯參拾元，餘由原告負擔。\n本判決原告勝訴部分，
         # partial defeated/victory 當做沒有輸好了:
         if "駁回。" in mainText and "勝訴" not in mainText:  # 之前這 case 當成 defeated 的就算了
