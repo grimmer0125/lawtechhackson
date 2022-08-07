@@ -73,14 +73,25 @@ class LawIssue(Document, validate_assignment=True):
 # 律師1w/事務所+判決w/date(或許加上公會地區)+判斷種類
 # 律師2w/事務所+判決w/date(或許加上公會地區+判斷種類
 class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
+    file_uri: str = ""
     is_defeated: bool = False
     # guild_name: Optional[str]  # 公會
+    court: str
     judgment_no: str
     judgment_date: datetime  # = Field(format="date-time")
-    court: str
-    domain: str = ""  # 刑事專長等等
     lawyer_name: str
-    type: str
+    type: str  # 應該不太需要,  判決 or 裁定
+    sys: str = ""  # 第一次忘了填. 刑事vs民事
+    domain: str = ""  # 刑事專長等等
+
+    class Settings:
+        indexes = [[
+            ("court", pymongo.ASCENDING),
+            ("judgment_no", pymongo.DESCENDING),
+            ("judgment_date", pymongo.DESCENDING),
+            ("type", pymongo.DESCENDING),  # 應該不太需要
+            ("lawyer_name", pymongo.ASCENDING),
+        ]]
 
 
 ## 原始資料
@@ -91,11 +102,11 @@ class JudgmentVictoryLawyerInfo(Document, validate_assignment=True):
 ####
 class Judgment(Document, validate_assignment=True):
     """ use lawsnote as reference first """
-    file_uri: str = ""
+    file_uri: Indexed(str) = ""
     court: str
     date: datetime  #str = Field(format="date-time")
     no: str
-    sys: str
+    sys: str  # 刑事 or 民事
     reason: str
     # long
     # judgement: str

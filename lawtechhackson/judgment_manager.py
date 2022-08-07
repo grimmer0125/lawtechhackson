@@ -152,7 +152,7 @@ async def add_lawyer_stat(is_defeated: bool, laywyer_name: str,
             stat = LawyerStat(name=laywyer_name, now_lic_no=lawyer.now_lic_no)
             lawyer_stat_dict[laywyer_name] = stat
         else:
-            # TODO: 要統計多少比率的判決是同名的嗎? 存在 JudgmentVictoryLawyerInfo 裡
+            # TODO: 要統計多少比率的判決是同名的嗎? 存在 JudgmentVictoryLawyerInfo 裡. 先算了，因為以後可能同名的人才會出來
             print("more than 1 lawyer, skip !!!")
     if stat is None:
         return
@@ -191,8 +191,7 @@ async def add_lawyer_stat(is_defeated: bool, laywyer_name: str,
     await stat.save()
 
 
-async def parse_judgment(judgment: Judgment,
-                         saveJudgmentVictoryLawyerInfo=False):
+async def parse_judgment(judgment: Judgment):
     # 民事:
     # - 被告應給付$$$元 (不一定)
     # - m 判決結果 會寫原告之訴駁回 之類
@@ -223,27 +222,57 @@ async def parse_judgment(judgment: Judgment,
         shortname = laywyer_name.replace("律師", "")
         group = group_lawyer[Key.group]
 
+        if group == PartyGroup.plaintiff:
+            laywyer_is_defeated = is_defeated
+        else:
+            laywyer_is_defeated = not is_defeated
+
         # NOTE: 方便查某律師跟判決的關係, 所以如果有lawyer_stat(目前同名就 ignore) 的話就可以再繼續查
         # JudgmentVictoryLawyerInfo
-        if saveJudgmentVictoryLawyerInfo:
-            ## only enable for first time iterate whole dataset
+        # if saveJudgmentVictoryLawyerInfo:
+        #     ## only enable for first time iterate whole dataset
+        #     lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
+        #         file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
+        #         is_defeated=is_defeated,
+        #         lawyer_name=shortname,
+        #         judgment_no=judgment.no,
+        #         judgment_date=judgment.date,
+        #         court=judgment.court,
+        #         type=judgment.type)
+        #     await lawyerVictoryInfo.insert()
+        # else:
+        lawyerVictoryInfos = await JudgmentVictoryLawyerInfo.find(
+            JudgmentVictoryLawyerInfo.court == judgment.court,
+            JudgmentVictoryLawyerInfo.judgment_no == judgment.no,
+            JudgmentVictoryLawyerInfo.judgment_date == judgment.date,
+            # 應該不太可能不同type同一天出來吧? type 應該不太需要
+            JudgmentVictoryLawyerInfo.type == judgment.type,
+            JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
+        if len(lawyerVictoryInfos) == 0:
+            print("not found !!")
+            ## TODO: create a one
             lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
+                file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
                 lawyer_name=shortname,
                 judgment_no=judgment.no,
                 judgment_date=judgment.date,
                 court=judgment.court,
-                type=judgment.type)
+                type=judgment.type,
+                is_defeated=laywyer_is_defeated,  # 現存的資料存時沒有這行
+                sys=judgment.sys)  # 現存的資料存時沒有這行
             await lawyerVictoryInfo.insert()
-
-        if group == PartyGroup.plaintiff:
-            await add_lawyer_stat(is_defeated, shortname, judgment)
-            # await update_laywer_stat_info(is_defeated, shortname,
-            #                               judgment.type)
         else:
-            await add_lawyer_stat(not is_defeated, shortname, judgment)
+            if len(lawyerVictoryInfos) > 1:
+                print("more than one lawyerVictoryInfo")
+            lawyerVictoryInfo = lawyerVictoryInfos[0]
+            lawyerVictoryInfo.sys = judgment.sys
+            lawyerVictoryInfo.file_uri = judgment.file_uri
+            lawyerVictoryInfo.is_defeated = laywyer_is_defeated
+            await lawyerVictoryInfo.save()
 
-            # await update_laywer_stat_info(not is_defeated, shortname,
-            #                               judgment.type)
+        await add_lawyer_stat(laywyer_is_defeated, shortname, judgment)
+        # await update_laywer_stat_info(is_defeated, shortname,
+        #                               judgment.type)
 
 
 async def load_file(path: str):
@@ -298,8 +327,9 @@ async def read_file(dataset_folder, court: Court, law: LawType,
 async def main():
     settings = DatasetSettings()
     db_setting = DataBaseSettings()
-    await init_mongo(db_setting.mongo_connect_str, "test3",
-                     [JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer])
+    await init_mongo(
+        db_setting.mongo_connect_str, "test3",
+        [JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer, LawyerStat])
 
     # NOTE: first test file
     # file_name = "民事裁定_110,簡聲抗,19_2021-09-29.json"
