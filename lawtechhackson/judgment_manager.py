@@ -1,5 +1,6 @@
+from ctypes import Union
 import json
-from typing import Any
+from typing import Any, Union, Optional
 import os
 import asyncio
 import pathlib
@@ -7,7 +8,7 @@ from pydantic import BaseModel
 from lawtechhackson.constants import Court, LawType, JudgmentType, PartyGroup
 from lawtechhackson.env import DatasetSettings, DataBaseSettings
 from lawtechhackson.db_manager import init_mongo
-from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer
+from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer, LawyerStat
 
 
 # English dict ref:
@@ -15,6 +16,7 @@ from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue,
 # 2. https://www.judicial.gov.tw/tw/lp-1501-1.html
 # 3. http://www.ls.fju.edu.tw/doc/vocabulary/%E9%99%84%E4%BB%B6%E5%9B%9B%20%20%20%E6%B0%91%E4%BA%8B%E8%A8%B4%E8%A8%9F%E6%B3%95.pdf
 async def load_issue_to_db(judgment: Judgment):
+    # NOTE: can use set to reduce duplicate query
     for issue in judgment.relatedIssues:
         lawName = issue.lawName
         if await LawIssue.find_one(LawIssue.name == lawName) == None:
@@ -24,6 +26,7 @@ async def load_issue_to_db(judgment: Judgment):
 
 
 lawyer_dict = {}
+lawyer_stat_dict = {}
 
 
 async def update_laywer_stat_info(is_defeated: bool, laywyer_name: str,
@@ -134,7 +137,62 @@ def find_lawyers(judgment: Judgment):
     return group_lawyer_list
 
 
-async def parse_judgment(judgment: Judgment):
+async def add_lawyer_stat(is_defeated: bool, laywyer_name: str,
+                          judgment: Judgment):
+
+    stat: Optional[LawyerStat] = None
+    if laywyer_name in lawyer_dict:
+        stat = lawyer_stat_dict[laywyer_name]
+    else:
+        lawyer_list = await Lawyer.find(Lawyer.name == laywyer_name).to_list()
+        if len(lawyer_list) == 0:
+            print("should not be possible to find 0 lawyers")
+        elif len(lawyer_list) == 1:
+            lawyer = lawyer_list[0]
+            stat = LawyerStat(name=laywyer_name, now_lic_no=lawyer.now_lic_no)
+            lawyer_stat_dict[laywyer_name] = stat
+        else:
+            # TODO: 要統計多少比率的判決是同名的嗎? 存在 JudgmentVictoryLawyerInfo 裡
+            print("more than 1 lawyer, skip !!!")
+    if stat is None:
+        return
+
+    ## relatedIssues part
+    issue_set = set(stat.law_issues)
+    for issue in judgment.relatedIssues:
+        law_name = issue.lawName
+        issue_set.add(law_name)
+    issue_list = list(issue_set)
+    stat.law_issues = issue_list
+
+    stat.total_litigates += 1
+    if judgment.type == JudgmentType.Judgment:
+        stat.judgment_count += 1
+        if is_defeated:
+            stat.defeated_judgment_count += 1
+            stat.total_defeated_litigates += 1
+
+        stat.win_rate_judgment = (
+            stat.judgment_count -
+            stat.defeated_judgment_count) / stat.judgment_count
+
+    else:
+        stat.ruling_count += 1
+        if is_defeated:
+            stat.defeated_ruling_count += 1
+            stat.total_defeated_litigates += 1
+
+        stat.win_rate_ruling = (stat.ruling_count -
+                                stat.defeated_ruling_count) / stat.ruling_count
+
+    stat.win_rate = (stat.total_litigates -
+                     stat.total_defeated_litigates) / stat.total_litigates
+
+    await stat.save()
+
+
+async def parse_judgment(judgment: Judgment,
+                         saveJudgmentVictoryLawyerInfo=False):
     # 民事:
     # - 被告應給付$$$元 (不一定)
     # - m 判決結果 會寫原告之訴駁回 之類
@@ -157,27 +215,35 @@ async def parse_judgment(judgment: Judgment):
 
     group_lawyer_list = find_lawyers(judgment)
 
-    # TODO:　等先一輪 load_issue_to_db 後，再來回來補填這塊
+    # TODO(pass):　等先一輪 load_issue_to_db 後，再來回來補填這塊
     # domain = find_domain(judgment)
 
     for group_lawyer in group_lawyer_list:
         laywyer_name = group_lawyer[Key.lawyer_name]
         shortname = laywyer_name.replace("律師", "")
         group = group_lawyer[Key.group]
-        lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
-            lawyer_name=shortname,
-            judgment_no=judgment.no,
-            judgment_date=judgment.date,
-            court=judgment.court,
-            type=judgment.type)
 
-        await lawyerVictoryInfo.insert()
+        # NOTE: 方便查某律師跟判決的關係, 所以如果有lawyer_stat(目前同名就 ignore) 的話就可以再繼續查
+        # JudgmentVictoryLawyerInfo
+        if saveJudgmentVictoryLawyerInfo:
+            ## only enable for first time iterate whole dataset
+            lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
+                lawyer_name=shortname,
+                judgment_no=judgment.no,
+                judgment_date=judgment.date,
+                court=judgment.court,
+                type=judgment.type)
+            await lawyerVictoryInfo.insert()
+
         if group == PartyGroup.plaintiff:
-            await update_laywer_stat_info(is_defeated, shortname,
-                                          judgment.type)
+            await add_lawyer_stat(is_defeated, shortname, judgment)
+            # await update_laywer_stat_info(is_defeated, shortname,
+            #                               judgment.type)
         else:
-            await update_laywer_stat_info(not is_defeated, shortname,
-                                          judgment.type)
+            await add_lawyer_stat(not is_defeated, shortname, judgment)
+
+            # await update_laywer_stat_info(not is_defeated, shortname,
+            #                               judgment.type)
 
 
 async def load_file(path: str):
@@ -186,8 +252,10 @@ async def load_file(path: str):
         judgment = Judgment(**json_data)
         judgment.file_uri = pathlib.Path(path).stem
         await judgment.insert()
-        # insert LawIssue
-        await load_issue_to_db(judgment)
+
+        # insert LawIssue for analyzing
+        # await load_issue_to_db(judgment)
+
         # insert JudgmentVictoryLawyerInfo & update laywer
         await parse_judgment(judgment)
 

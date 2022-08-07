@@ -2,6 +2,7 @@ from pydantic import BaseModel, BaseSettings, Field, validator, root_validator
 from typing import Optional, Tuple, Literal
 from beanie import Document, Indexed, init_beanie
 from datetime import datetime
+import pymongo
 
 
 class RelatedIssue(BaseModel, validate_assignment=True):
@@ -114,19 +115,58 @@ class Judgment(Document, validate_assignment=True):
         return datetime.fromisoformat(v)
 
 
+class LawyerStat(Document, validate_assignment=True):
+    name: Indexed(str)
+    now_lic_no: Indexed(str)
+
+    law_issues: list[str] = []
+
+    total_litigates: int = 0
+    total_defeated_litigates: int = 0
+    win_rate: Optional[float] = None
+
+    # decision type: 判決
+    judgment_count: int = 0  # total
+    defeated_judgment_count: int = 0
+    win_rate_judgment: Optional[float] = None
+
+    # decision type: 裁定
+    ruling_count: int = 0  # total
+    defeated_ruling_count: int = 0
+    win_rate_ruling: Optional[float] = None
+
+    class Settings:
+        indexes = [
+            "win_rate", "win_rate_judgment",
+            [
+                ("name", pymongo.ASCENDING),
+                ("now_lic_no", pymongo.DESCENDING),
+            ]
+        ]
+
+
 class Lawyer(Document, validate_assignment=True):
+    # None after Indexed should be removed
     name: Indexed(str) = None
-    now_lic_no: Indexed(str) = None
+    now_lic_no: Indexed(str) = None  # actually this single index is not used
     court: list[str]
     # 公會名字
     guild_name: list[str]
-    office: Indexed(str) = None
+    office: Indexed(str) = None  # actually this single index is not used
+
+    #### depreciated, 移到 LawyerStat ####
     ## stat info fields from JudgmentVictoryLawyerInfo
     # victory_count: int = 0
     litigate_judgment_total: int = 0  # total
     defeated_judgment_count: int = 0
     litigate_ruling_total: int = 0  # total
     defeated_ruling_count: int = 0
+
+    class Settings:
+        indexes = [[
+            ("name", pymongo.ASCENDING),
+            ("now_lic_no", pymongo.DESCENDING),
+        ]]
 
 
 class Guild(BaseModel, validate_assignment=True):

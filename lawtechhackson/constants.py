@@ -17,6 +17,7 @@ class LawType(StrEnum):
     Criminal_Compensation = "－刑事補償"
 
 
+# or call decision type
 class JudgmentType(StrEnum):
     Judgment = "判決"
     Ruling = "裁定"
