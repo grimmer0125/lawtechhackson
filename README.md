@@ -6,7 +6,7 @@
 - Use Python 3.9.2+. Via pyenv: `pyenv install 3.9.2`.
 - (Optional) `pyenv local 3.9.2`: Let pyenv to switch 3.9.2 automatically for this project.
 - Install [Poetry](https://python-poetry.org/) to manage **dependencies**.
-- `poetry shell`: Ask poetry to create a Python virtual environment ([venv](https://docs.python.org/3/library/venv.html)): Everytime you use command line to run this project, execute this command to switch.
+- ~~`poetry shell`: Ask poetry to create a Python virtual environment ([venv](https://docs.python.org/3/library/venv.html)): Everytime you use command line to run this project, execute this command to switch.~~
 - `poetry install`: Install dependencies.
 
 ### Formatter
