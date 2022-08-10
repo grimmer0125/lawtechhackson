@@ -38,7 +38,7 @@ def lawyer_query(user_input: List, model, lawyer_emd) -> List[str]:
 
 def main():
     model = SentenceTransformer('ckiplab/albert-base-chinese')
-    with open('./lawyer_emd.pickle', 'rb') as f:
+    with open('./sample_data/lawyer_emd.pickle', 'rb') as f:
         lawyer_emd = pickle.load(f)
 
     user_input = "股票"
