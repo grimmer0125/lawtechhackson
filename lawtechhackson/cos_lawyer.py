@@ -34,10 +34,11 @@ def lawyer_query(user_input: List, model, lawyer_emd) -> List[str]:
     return lawyer[lawer_indces]
 
 
-model = SentenceTransformer('ckiplab/albert-base-chinese')
-with open('./lawyer_emd.pickle', 'rb') as f:
-    lawyer_emd = pickle.load(f)
+if __name__ == '__main__':
+    model = SentenceTransformer('ckiplab/albert-base-chinese')
+    with open('./lawyer_emd.pickle', 'rb') as f:
+        lawyer_emd = pickle.load(f)
 
-user_input = "股票"
-result = lawyer_query([user_input], model, lawyer_emd)
-print(result)
+    user_input = "股票"
+    result = lawyer_query([user_input], model, lawyer_emd)
+    print(result)
