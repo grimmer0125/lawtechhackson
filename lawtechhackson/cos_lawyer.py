@@ -34,7 +34,7 @@ def lawyer_query(user_input: List, model, lawyer_emd) -> List[str]:
     return lawyer[lawer_indces]
 
 
-if __name__ == '__main__':
+def main():
     model = SentenceTransformer('ckiplab/albert-base-chinese')
     with open('./lawyer_emd.pickle', 'rb') as f:
         lawyer_emd = pickle.load(f)
@@ -42,3 +42,7 @@ if __name__ == '__main__':
     user_input = "股票"
     result = lawyer_query([user_input], model, lawyer_emd)
     print(result)
+
+
+if __name__ == '__main__':
+    main()
