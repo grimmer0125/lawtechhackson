@@ -5,11 +5,14 @@ description = ""
 authors = ["Grimmer <grimmer0125@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-pydantic = {extras = ["dotenv"], version = "^1.9.1"}
+python = ">=3.9,<3.11"
+scikit-learn = "^1.1.2"
 StrEnum = "^0.4.8"
-beanie = "^1.11.6"
-pymongo = {extras = ["srv"], version = "^4.2.0"}
+beanie = "^1.11.7"
+numpy = "^1.23.1"
+pydantic = {extras = ["dotenv"], version = "^1.9.1"}
+pymongo = {extras = ["extras"], version = "^4.2.0"}
+sentence-transformers = "^2.2.2"
 
 [tool.poetry.dev-dependencies]
 yapf = "^0.32.0"
