@@ -1,11 +1,9 @@
 import pickle
 from sentence_transformers import SentenceTransformer
-from tqdm import tqdm
 import numpy as np
-from numpy import dot
 from numpy.linalg import norm
-from numpy.typing as npt
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import List
 
 
 def get_similiar_lawyers( cosine_sim:np.ndarray, input_lawyer:int = 3) -> List[int]:
@@ -26,21 +24,25 @@ def get_similiar_lawyers( cosine_sim:np.ndarray, input_lawyer:int = 3) -> List[i
 
 
 
-def lawyer_query(user_input, model, lawyer_emd):
+def lawyer_query(user_input: List, model, lawyer_emd) -> List[str]:
     query_emd = model.encode(user_input)
-    search_emd = lawyer_emd.values()
-    #cosine = np.dot(search_emd,query_emd)/(norm(search_emd, axis=1)*norm(query_emd))
+    search_emd = np.array(list(lawyer_emd.values()))
     cosine_sim = cosine_similarity(search_emd, query_emd) # using cosine_sim in scikit learn for quick access
+    lawer_indces = get_similiar_lawyers(cosine_sim, 3)
+    lawyer = np.array(list(lawyer_emd.keys()))
 
-    lawer_indces = get_similiar_lawyers(cosine_sim,3)
-    lawyer_dict = {}
-
-
-    return lawyer_dict
+    return lawyer[lawer_indces]
 
 
-model = SentenceTransformer('ckiplab/albert-base-chinese')
-with open('./lawyer_emd.pickle', 'rb') as f:
-    lawyer_emd = pickle.load(f)
+def main():
+    model = SentenceTransformer('ckiplab/albert-base-chinese')
+    with open('./lawyer_emd.pickle', 'rb') as f:
+        lawyer_emd = pickle.load(f)
 
-# result = lawyer_query(user_input, model, lawyer_emd)
+    user_input = "股票"
+    result = lawyer_query([user_input], model, lawyer_emd)
+    print(result)
+
+
+if __name__ == '__main__':
+    main()
