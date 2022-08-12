@@ -2,6 +2,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug Server",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "lawtechhackson.main:app",
+                "--host",
+                "0.0.0.0",
+                "--reload"
+            ],
+            "justMyCode": false
+        },
+        {
             "name": "Python: current file",
             "type": "python",
             "request": "launch",
