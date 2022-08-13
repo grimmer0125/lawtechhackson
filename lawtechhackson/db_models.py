@@ -190,17 +190,27 @@ class Guild(BaseModel, validate_assignment=True):
 class LawyerData(BaseModel, validate_assignment=True):
     lawyers: list[Lawyer]
     # courtMap: [] # always a empty list
-    guildMap: list[list[str]] = Field(format=Guild)  # e.g. [['台北律師公會', 7195]]
+    guildMap: list[Guild]  #= Field(format=Guild)  # e.g. [['台北律師公會', 7195]]
 
-    @validator("guildMap")
+    # 下面這行會導致 pydantic2ts error:   File "pydantic/json.py", line 97, in pydantic.json.pydantic_encoder
+    #   TypeError: Object of type 'ModelMetaclass' is not JSON serializable
+    # guildMap: list[Guild]  #= Field(format=Guild)
+
+    # TODO: 原本是沒有 pre + 上面的  Field(format=Guild) 寫法. 新寫法還沒測
+    @validator("guildMap", pre=True)
     def set_guild(cls, v):
-        guilds = []
+        guilds = None
         for guild_raw in v:
-            name = guild_raw[0]
-            no = guild_raw[1]
-            guild = Guild(name=name, no=no)
-            guilds.append(guild)
-        return guilds
+            if isinstance(v, list):
+                name = guild_raw[0]
+                no = guild_raw[1]
+                guild = Guild(name=name, no=no)
+                if guilds is None:
+                    guilds = []
+                guilds.append(guild)
+        if guilds is not None:
+            return guilds
+        return v
 
 
 class LawyerBatchData(BaseModel, validate_assignment=True):

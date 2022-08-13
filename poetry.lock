@@ -272,6 +272,18 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
 [[package]]
+name = "pydantic-to-typescript"
+version = "1.0.8"
+description = "Convert pydantic models to typescript interfaces"
+category = "dev"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+pydantic = "*"
+
+[[package]]
 name = "pymongo"
 version = "4.2.0"
 description = "Python driver for MongoDB <http://www.mongodb.org>"
@@ -675,7 +687,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "fc98b7750180dfe598f813290d22991f7c82abde1ba13e225d7b14644f39031d"
+content-hash = "1d9ad6ce8aae2135ecbff89fe5f3d6fa17dae3922866e0609659be81e5ad2e3c"
 
 [metadata.files]
 anyio = [
@@ -797,6 +809,7 @@ pydantic = [
     {file = "pydantic-1.9.1-py3-none-any.whl", hash = "sha256:4988c0f13c42bfa9ddd2fe2f569c9d54646ce84adc5de84228cfe83396f3bd58"},
     {file = "pydantic-1.9.1.tar.gz", hash = "sha256:1ed987c3ff29fff7fd8c3ea3a3ea877ad310aae2ef9889a119e22d3f2db0691a"},
 ]
+pydantic-to-typescript = []
 pymongo = []
 pyparsing = [
     {file = "pyparsing-3.0.9-py3-none-any.whl", hash = "sha256:5026bae9a10eeaefb61dab2f09052b9f4307d44aee4eda64b309723d8d206bbc"},
