@@ -1,4 +1,3 @@
-from ctypes import Union
 import json
 from operator import truediv
 from typing import Any, Union, Optional

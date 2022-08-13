@@ -6,7 +6,6 @@ import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
 import axios from 'axios';
-import { borderColor } from '@mui/system';
 
 interface LawyerProfile {
   name: string;
@@ -93,6 +92,11 @@ function App() {
     setSearchValue(event.target.value);
   };
 
+  const resetStatus = () => {
+    setSelectLawyer("");
+    setJudgmentList([])
+  }
+
 
   const onDetailBtnClick = async (evt: any, lawyerName: string) => {
     console.log("onQueryBtnClick:", lawyerName)
@@ -112,13 +116,14 @@ function App() {
       return;
     }
 
+    resetStatus();
+
     const api = `${SERVER_HOST}/query-lawyer`
     const { data } = await axios.post(api, {
       question: searchValue,
     })
     console.log({ data });
     if (Array.isArray(data)) {
-      // todo: update ui
       setLawyerProfileList(data);
     }
   }
@@ -128,7 +133,7 @@ function App() {
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={1}>
           <Grid xs={4}>
-            <StyledPaper>Prefect Match
+            <StyledPaper>Perfect Match
               <Box
                 component="form"
                 sx={{
@@ -188,7 +193,7 @@ function App() {
                   console.log("judgment!!!", judgment)
                   const { court, file_uri, reason, mainText, relatedIssues, party } = judgment;
                   return (
-                    <Paper key={file_uri}>
+                    <Paper elevation={3} key={file_uri}>
                       {`${court}`}<br />
                       {`${file_uri}`}<br />
                       {`${reason}`}<br />
