@@ -44,8 +44,9 @@ class UserQuestionItem(BaseModel):
 
 
 @app.post("/query-lawyer")
-async def query_lawyer(item: UserQuestionItem,
-                       response_model=list[LawyerProfile]):
+async def query_lawyer(item: UserQuestionItem):
+    # FIXME: 加了 fastapi response_model 會 error
+    # response_model=list[LawyerProfile]): TypeError: Object of type 'type' is not JSON serializable
     question = item.question
     str_list = question.split()
     lawyer_name_list = ai_service.predict(str_list)
@@ -63,8 +64,8 @@ class LawyerDetailQueryItem(BaseModel):
     # now_lic_no: Optional[str]
 
 
-@app.post("/lawyer-detail")
-async def lawyer_detail(item: LawyerDetailQueryItem):
-    lawyer_name = item.lawyer_name
-    judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
-    return judgment_list
+# @app.post("/lawyer-detail")
+# async def lawyer_detail(item: LawyerDetailQueryItem):
+#     lawyer_name = item.lawyer_name
+#     judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
+#     return judgment_list

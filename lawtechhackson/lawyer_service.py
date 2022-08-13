@@ -1,7 +1,7 @@
 from typing import Any
 from lawtechhackson.db_manager import init_mongo
 from lawtechhackson.env import DataBaseSettings
-from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, Lawyer, LawyerStat
+from lawtechhackson.db_models import JudgmentVictoryLawyerInfo, Judgment, Lawyer, LawyerStat
 from beanie.operators import In
 from typing import Any
 from pydantic import BaseModel
@@ -46,14 +46,20 @@ class LawyerService:
         return non_duplicate_list
 
     async def get_lawyers_profile(self, lawyer_name_list: list[str]):
-        lawyer_list: list[Lawyer] = []
 
-        lawyer_found_list = await Lawyer.find(In(Lawyer.name,
-                                                 lawyer_list)).to_list()
-        lawyer_unique_list: list[Lawyer] = self.filter_duplicate(
-            lawyer_found_list)
-        lawyer_name_unique_list = map(lambda x: x.name, lawyer_unique_list)
-        lawyer_state_list = await LawyerStat.find(
+        lawyer_short_name_list = list(
+            map(lambda x: x.replace("律師", ""), lawyer_name_list))
+        lawyer_found_list = await Lawyer.find(
+            In(Lawyer.name, lawyer_short_name_list)).to_list()
+
+        lawyer_unique_list: list[
+            Lawyer] = self.filter_duplicate(  # 所以這兩人都沒有同名的律師
+                lawyer_found_list)
+        lawyer_name_unique_list = list(
+            map(lambda x: x.name, lawyer_unique_list))
+        # 感覺這邊應該也不用丟 lawyer_name_unique_list, 因為同名的本來就不會在 LawyerStat 裡。
+        # TODO: 為何 張宇維律師 找不到 LawyerStat，但 ai model 有 output 這位??? 可以用 JudgmentVictoryLawyerInfo 檢查
+        lawyer_state_list = await LawyerStat.find(  # 張宇維律師 (<- not found in stat, 可能是因為重複, 但 Lawyer 沒有找到同名的阿?), 黃鉦哲律師
             In(Lawyer.name, lawyer_name_unique_list)).to_list()
         lawyer_state_dict: dict[str, LawyerStat] = dict()
         for lawyer_stat in lawyer_state_list:
