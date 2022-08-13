@@ -1,7 +1,7 @@
 import asyncio
 from lawtechhackson.db_manager import init_mongo
 from lawtechhackson.env import DatasetSettings, DataBaseSettings
-from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer
+from lawtechhackson.db_models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer
 
 
 async def list_LawIssue():

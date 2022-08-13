@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from lawtechhackson.constants import Court, LawType, JudgmentType, PartyGroup
 from lawtechhackson.env import DatasetSettings, DataBaseSettings
 from lawtechhackson.db_manager import init_mongo
-from lawtechhackson.models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer, LawyerStat
+from lawtechhackson.db_models import JudgmentVictoryLawyerInfo, Judgment, LawIssue, Lawyer, LawyerStat
 
 
 # English dict ref:
