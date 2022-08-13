@@ -6,6 +6,7 @@ import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
 import axios from 'axios';
+import { borderColor } from '@mui/system';
 
 interface LawyerProfile {
   name: string;
@@ -84,16 +85,18 @@ function App() {
 
   const [searchValue, setSearchValue] = React.useState('');
   const [lawyerProfileList, setLawyerProfileList] = React.useState<LawyerProfile[]>([]);
+  const [selectLawyer, setSelectLawyer] = React.useState("");
   const [judgmentList, setJudgmentList] = React.useState<Judgment[]>([]);
 
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(event.target.value);
   };
 
 
   const onDetailBtnClick = async (evt: any, lawyerName: string) => {
     console.log("onQueryBtnClick:", lawyerName)
+    setSelectLawyer(lawyerName);
     const api = `${SERVER_HOST}/lawyer-detail`
     const { data } = await axios.post(api, {
       lawyer_name: lawyerName,
@@ -103,8 +106,7 @@ function App() {
     setJudgmentList(data);
   }
 
-  const onQueryBtnClick = async (evt?: any) => {
-    console.log("onQueryBtnClick event:", evt)
+  const onSearchBtnClick = async (evt?: any) => {
 
     if (!searchValue) {
       return;
@@ -134,17 +136,17 @@ function App() {
                 }}
                 autoComplete="off"
               >
-                <TextField style={{ width: 350 }} value={searchValue} onChange={handleChange}
+                <TextField style={{ width: 350 }} value={searchValue} onChange={handleSearchInputChange}
                   onKeyPress={(event) => {
                     if (event.key === 'Enter') {
                       console.log('Enter Pressed')
                       event.preventDefault();
-                      onQueryBtnClick();
+                      onSearchBtnClick();
                     }
                   }}
                   id="outlined-basic" label="請輸入你的法律問題或關鍵字 (e.g. 股票)" variant="outlined" />
               </Box>
-              <Button variant="contained" onClick={onQueryBtnClick}>送出</Button>
+              <Button variant="contained" onClick={onSearchBtnClick}>送出</Button>
             </StyledPaper>
           </Grid>
           <Grid xs={4}>
@@ -157,7 +159,7 @@ function App() {
                   const { name, now_lic_no, guilds, total_litigates, win_rate, law_issues } = lawyerProfile;
                   return (
                     <Box key={now_lic_no}>
-                      <Button onClick={(e) => onDetailBtnClick(e, name)}>
+                      <Button variant={name == selectLawyer ? "contained" : "text"} onClick={(e) => onDetailBtnClick(e, name)}>
                         {`${name}, ${now_lic_no}, ${guilds}, 官司數:${total_litigates}, 勝率:${win_rate} , ${law_issues}`}
 
                         {/* name: string;
