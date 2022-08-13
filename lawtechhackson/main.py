@@ -1,8 +1,20 @@
+# TODO:
+# 使用 https://github.com/ets-labs/python-dependency-injector
+# 1. 初始化 DB / AI
+#   1. singleton
+#   2. or resource https://python-dependency-injector.ets-labs.org/providers/resource.html
+# 2. 跟 fastapi 整合
+#   1. https://python-dependency-injector.ets-labs.org/examples/fastapi.html#fastapi-example
+#   2. https://python-dependency-injector.ets-labs.org/examples/fastapi-redis.html#fastapi-redis-example
+#   3. https://python-dependency-injector.ets-labs.org/examples/fastapi-sqlalchemy.html
+# 3. 多個/層 containers  https://github.com/ets-labs/python-dependency-injector
+#  1. Containers. Provides declarative and dynamic containers. See Containers.
+
 from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 from lawtechhackson.cos_lawyer import AIService
-from lawtechhackson.lawyer_service import LawyerService
+from lawtechhackson.lawyer_service import LawyerProfile, LawyerService
 
 app = FastAPI()
 ai_service = AIService()
@@ -32,7 +44,8 @@ class UserQuestionItem(BaseModel):
 
 
 @app.post("/query-lawyer")
-async def query_lawyer(item: UserQuestionItem):
+async def query_lawyer(item: UserQuestionItem,
+                       response_model=list[LawyerProfile]):
     question = item.question
     str_list = question.split()
     lawyer_name_list = ai_service.predict(str_list)
@@ -40,3 +53,18 @@ async def query_lawyer(item: UserQuestionItem):
     laywer_profile_list = await lawyer_service.get_lawyers_profile(
         lawyer_name_list)
     return laywer_profile_list
+
+
+from typing import Any, Optional
+
+
+class LawyerDetailQueryItem(BaseModel):
+    lawyer_name: str
+    # now_lic_no: Optional[str]
+
+
+@app.post("/lawyer-detail")
+async def lawyer_detail(item: LawyerDetailQueryItem):
+    lawyer_name = item.lawyer_name
+    judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
+    return judgment_list

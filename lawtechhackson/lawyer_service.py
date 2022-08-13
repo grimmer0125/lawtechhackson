@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 class LawyerProfile(BaseModel):
     name: str
-    no: str
+    now_lic_no: str
     guilds: list[str] = []
     office: str
     total_litigates: int = 0
@@ -62,7 +62,7 @@ class LawyerService:
         profile_list: list[LawyerProfile] = []
         for i, lawyer in enumerate(lawyer_unique_list):
             name = lawyer.name
-            no = lawyer.now_lic_no
+            now_lic_no = lawyer.now_lic_no
             guilds = lawyer.guild_name
             office = lawyer.office
             total_litigates = 0
@@ -78,7 +78,7 @@ class LawyerService:
                     win_rate = stat.win_rate
                 law_issues = stat.law_issues
             profile = LawyerProfile(name=name,
-                                    no=no,
+                                    now_lic_no=now_lic_no,
                                     guilds=guilds,
                                     office=office,
                                     total_litigates=total_litigates,
@@ -88,5 +88,22 @@ class LawyerService:
 
         return profile_list
 
-    async def get_lawyer_profile(self):
-        pass
+    async def get_lawyer_detail_profile(self, lawyer_name: str):
+        shortname = lawyer_name.replace("律師", "")
+        judgmentVictory_list = await JudgmentVictoryLawyerInfo.find(
+            JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
+
+        query_limit = 10
+        judgment_list = []
+        # TODO(n+1 query): mongoDB 的 In 有可能兩種 query嗎?
+        for i, judgmentVictory in enumerate(judgmentVictory_list):
+            if i >= query_limit:
+                print("this laywer has more than 10 judgments")
+                break
+
+            # NOTE: 應該只可能找到一筆，多筆的 check 先 skip
+            judgment = await Judgment.find_one(
+                Judgment.court == judgmentVictory.court,
+                Judgment.file_uri == judgmentVictory.file_uri)
+            judgment_list.append(judgment)
+        return judgment_list
