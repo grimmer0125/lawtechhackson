@@ -32,13 +32,14 @@ class AIService:
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
 
         # Get the scores of the top-k most similar articles
-        sim_scores = sim_scores[1:input_lawyer]
+        sim_scores = sim_scores[0:input_lawyer]
 
         # Get the lawyer indices
         lawyer_indices = [i[0] for i in sim_scores]
+        scores = [i[1] for i in sim_scores]
 
         # Return the top-k most similar article ID
-        return lawyer_indices
+        return lawyer_indices, scores
 
     def lawyer_query(self, user_input: list[str]) -> list[str]:
         query_emd = self.model.encode(user_input)
@@ -46,13 +47,19 @@ class AIService:
         cosine_sim = cosine_similarity(
             search_emd,
             query_emd)  # using cosine_sim in scikit learn for quick access
-        lawyer_indices = self.get_similiar_lawyers(cosine_sim, 3)
+        lawyer_indices, scores = self.get_similiar_lawyers(cosine_sim, 3)
         lawyer = list(self.lawyer_emd.keys())
 
         found_lawyer_list = [lawyer[index] for index in lawyer_indices]
         return found_lawyer_list
 
     def predict(self, query_str_list: list[str]) -> list[str]:
+        username = "nchureborn@gmail.com" #這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        apikey   = "U9klFNFijvCMGxEjSy&m4I#bQ!o#aJ$" #這裡填入您在 https://api.droidtown.co 登入後取得的 api Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        articut = Articut(username, apikey)
+        resultDICT = articut.parse(query_str_list)
+        # main()
+        query_str_list = resultDICT['result_segmentation'].split('/')
         result = self.lawyer_query(query_str_list)
         return result
 
