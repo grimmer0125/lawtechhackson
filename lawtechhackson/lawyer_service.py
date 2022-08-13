@@ -100,7 +100,7 @@ class LawyerService:
             JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
 
         query_limit = 10
-        judgment_list = []
+        judgment_list: list[Judgment] = []
         # TODO(n+1 query): mongoDB 的 In 有可能兩種 query嗎?
         for i, judgmentVictory in enumerate(judgmentVictory_list):
             if i >= query_limit:
@@ -111,5 +111,6 @@ class LawyerService:
             judgment = await Judgment.find_one(
                 Judgment.court == judgmentVictory.court,
                 Judgment.file_uri == judgmentVictory.file_uri)
-            judgment_list.append(judgment)
+            if judgment is not None:
+                judgment_list.append(judgment)
         return judgment_list
