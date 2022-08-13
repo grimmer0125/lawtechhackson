@@ -196,7 +196,7 @@ async def fill_lawyer_stat(is_defeated: bool, laywyer_name: str,
     # await stat.save()
 
 
-find = False
+# find = False
 
 
 async def parse_judgment(judgment: Judgment):
@@ -254,34 +254,33 @@ async def parse_judgment(judgment: Judgment):
         #         type=judgment.type)
         #     await lawyerVictoryInfo.insert()
         # else:
-        if False:
-            lawyerVictoryInfos = await JudgmentVictoryLawyerInfo.find(
-                JudgmentVictoryLawyerInfo.court == judgment.court,
-                JudgmentVictoryLawyerInfo.judgment_no == judgment.no,
-                JudgmentVictoryLawyerInfo.judgment_date == judgment.date,
-                # 應該不太可能不同type同一天出來吧? type 應該不太需要
-                JudgmentVictoryLawyerInfo.type == judgment.type,
-                JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
-            if len(lawyerVictoryInfos) == 0:
-                ## TODO: create a one
-                lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
-                    file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
-                    lawyer_name=shortname,
-                    judgment_no=judgment.no,
-                    judgment_date=judgment.date,
-                    court=judgment.court,
-                    type=judgment.type,
-                    is_defeated=laywyer_is_defeated,  # 現存的資料存時沒有這行
-                    sys=judgment.sys)  # 現存的資料存時沒有這行
-                await lawyerVictoryInfo.insert()  #
-            else:
-                if len(lawyerVictoryInfos) > 1:
-                    print("more than one lawyerVictoryInfo")
-                lawyerVictoryInfo = lawyerVictoryInfos[0]
-                lawyerVictoryInfo.sys = judgment.sys
-                lawyerVictoryInfo.file_uri = judgment.file_uri
-                lawyerVictoryInfo.is_defeated = laywyer_is_defeated
-                await lawyerVictoryInfo.save()
+        lawyerVictoryInfos = await JudgmentVictoryLawyerInfo.find(
+            JudgmentVictoryLawyerInfo.court == judgment.court,
+            JudgmentVictoryLawyerInfo.judgment_no == judgment.no,
+            JudgmentVictoryLawyerInfo.judgment_date == judgment.date,
+            # 應該不太可能不同type同一天出來吧? type 應該不太需要
+            JudgmentVictoryLawyerInfo.type == judgment.type,
+            JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
+        if len(lawyerVictoryInfos) == 0:
+            ## TODO: create a one
+            lawyerVictoryInfo = JudgmentVictoryLawyerInfo(
+                file_uri=judgment.file_uri,  # 現存的資料存時沒有這行
+                lawyer_name=shortname,
+                judgment_no=judgment.no,
+                judgment_date=judgment.date,
+                court=judgment.court,
+                type=judgment.type,
+                is_defeated=laywyer_is_defeated,  # 現存的資料存時沒有這行
+                sys=judgment.sys)  # 現存的資料存時沒有這行
+            await lawyerVictoryInfo.insert()  #
+        else:
+            if len(lawyerVictoryInfos) > 1:
+                print("more than one lawyerVictoryInfo")
+            lawyerVictoryInfo = lawyerVictoryInfos[0]
+            lawyerVictoryInfo.sys = judgment.sys
+            lawyerVictoryInfo.file_uri = judgment.file_uri
+            lawyerVictoryInfo.is_defeated = laywyer_is_defeated
+            await lawyerVictoryInfo.save()
 
         await fill_lawyer_stat(laywyer_is_defeated, shortname, judgment)
         # await update_laywer_stat_info(is_defeated, shortname,
@@ -302,9 +301,9 @@ async def load_file(path: str):
 
         # insert JudgmentVictoryLawyerInfo & update lawyerStat
 
-    global find
-    if find is False and judgment.file_uri == "民事判決_100,士訴,2_2011-09-07":
-        find = True
+    # global find
+    # if find is False and judgment.file_uri == "民事判決_100,士訴,2_2011-09-07":
+    #     find = True
 
     await parse_judgment(judgment)
 
