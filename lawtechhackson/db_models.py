@@ -123,7 +123,9 @@ class Judgment(Document, validate_assignment=True):
 
     @validator("date", pre=True)
     def set_date(cls, v):
-        return datetime.fromisoformat(v)
+        if isinstance(v, str):
+            return datetime.fromisoformat(v)
+        return v
 
 
 class LawyerStat(Document, validate_assignment=True):

@@ -64,8 +64,8 @@ class LawyerDetailQueryItem(BaseModel):
     # now_lic_no: Optional[str]
 
 
-# @app.post("/lawyer-detail")
-# async def lawyer_detail(item: LawyerDetailQueryItem):
-#     lawyer_name = item.lawyer_name
-#     judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
-#     return judgment_list
+@app.post("/lawyer-detail")
+async def lawyer_detail(item: LawyerDetailQueryItem):
+    lawyer_name = item.lawyer_name
+    judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
+    return judgment_list
