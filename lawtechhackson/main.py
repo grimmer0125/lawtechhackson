@@ -15,8 +15,18 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from lawtechhackson.cos_lawyer import AIService
 from lawtechhackson.lawyer_service import LawyerProfile, LawyerService
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 ai_service = AIService()
 lawyer_service = LawyerService()
 
