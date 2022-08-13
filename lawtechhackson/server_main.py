@@ -14,6 +14,7 @@ from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 from lawtechhackson.cos_lawyer import AIService
+from lawtechhackson.db_models import Judgment
 from lawtechhackson.lawyer_service import LawyerProfile, LawyerService
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -53,9 +54,8 @@ class UserQuestionItem(BaseModel):
     question: str
 
 
-@app.post("/query-lawyer")
+@app.post("/query-lawyer", response_model=list[LawyerProfile])
 async def query_lawyer(item: UserQuestionItem):
-    # FIXME: 加了 fastapi response_model 會 error
     # response_model=list[LawyerProfile]): TypeError: Object of type 'type' is not JSON serializable
     question = item.question
     str_list = question.split()
@@ -74,7 +74,7 @@ class LawyerDetailQueryItem(BaseModel):
     # now_lic_no: Optional[str]
 
 
-@app.post("/lawyer-detail")
+@app.post("/lawyer-detail", response_model=list[Judgment])
 async def lawyer_detail(item: LawyerDetailQueryItem):
     lawyer_name = item.lawyer_name
     judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
