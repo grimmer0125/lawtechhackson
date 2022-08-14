@@ -58,12 +58,19 @@ class LawyerService:
         lawyer_name_unique_list = list(
             map(lambda x: x.name, lawyer_unique_list))
         # 感覺這邊應該也不用丟 lawyer_name_unique_list, 因為同名的本來就不會在 LawyerStat 裡。
-        # TODO: 為何 張宇維律師 找不到 LawyerStat，但 ai model 有 output 這位??? 可以用 JudgmentVictoryLawyerInfo 檢查
-        lawyer_state_list = await LawyerStat.find(  # 張宇維律師 (<- not found in stat, 可能是因為重複, 但 Lawyer 沒有找到同名的阿?), 黃鉦哲律師
+        # TODOx (是因為 ai 那邊除了士林多了台北地院，但 DB 只有士林 ): 為何 張宇維律師 找不到 LawyerStat，但 ai model 有 output 這位??? 可以用 JudgmentVictoryLawyerInfo 檢查
+        # 張宇維律師 (<- not found in stat, 可能是因為重複, 但 Lawyer 沒有找到同名的阿?), 黃鉦哲律師
+        lawyer_state_list = await LawyerStat.find(
             In(Lawyer.name, lawyer_name_unique_list)).to_list()
         lawyer_state_dict: dict[str, LawyerStat] = dict()
         for lawyer_stat in lawyer_state_list:
-            lawyer_state_dict[lawyer_stat.name] = lawyer_stat
+            if lawyer_stat.name in lawyer_state_dict:
+                # TODO: 可能找到同一律師但重複的 LawyerStat，因為之前 parse 時跑了幾次 (可能部份是跑一半)，每一次都存一個
+                if lawyer_stat.total_litigates > lawyer_state_dict[
+                        lawyer_stat.name].total_litigates:
+                    lawyer_state_dict[lawyer_stat.name] = lawyer_stat
+            else:
+                lawyer_state_dict[lawyer_stat.name] = lawyer_stat
 
         profile_list: list[LawyerProfile] = []
         for i, lawyer in enumerate(lawyer_unique_list):
