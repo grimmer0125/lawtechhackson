@@ -155,7 +155,7 @@ function App() {
                       onSearchBtnClick();
                     }
                   }}
-                  id="outlined-basic" label="請輸入你的法律問題或關鍵字 (e.g. 股票)" variant="outlined" />
+                  id="outlined-basic" label="請輸入你的法律問題或關鍵字" variant="outlined" />
               </Box>
               <Button variant="contained" onClick={onSearchBtnClick}>送出</Button>
             </StyledPaper>
