@@ -5,6 +5,10 @@ import Paper from '@mui/material/Paper';
 import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
+import Card from '@mui/material/Card';
+
+import Chip from '@mui/material/Chip';
+
 import axios from 'axios';
 
 interface LawyerProfile {
@@ -128,6 +132,8 @@ function App() {
     }
   }
 
+  const lawyerProfileNoneEmptyList = lawyerProfileList.filter(profile => profile.total_litigates > 0);
+
   return (
     <React.Fragment>
       <Box sx={{ flexGrow: 1 }}>
@@ -160,14 +166,31 @@ function App() {
 
                 {/* <Paper style={{ height: "100vh" }}> */}
                 Lawyers Results Panel
-                {lawyerProfileList.map((lawyerProfile) => {
+                {lawyerProfileNoneEmptyList.map((lawyerProfile, index) => {
                   const { name, now_lic_no, guilds, total_litigates, win_rate, law_issues } = lawyerProfile;
+                  // const selected = name === selectLawyer ? true : false;
+                  let borderStyle = {}
+                  if (name === selectLawyer) {
+                    borderStyle = { border: "1px solid red" }
+                  }
+                  // if (selected) {
+                  //   borderStyle = {}
+                  // }
                   return (
-                    <Box key={now_lic_no}>
-                      <Button variant={name == selectLawyer ? "contained" : "text"} onClick={(e) => onDetailBtnClick(e, name)}>
-                        {`${name}, ${now_lic_no}, ${guilds}, 官司數:${total_litigates}, 勝率:${win_rate} , ${law_issues}`}
+                    <Card key={now_lic_no} style={{ margin: 15, ...borderStyle }} onClick={(e) => onDetailBtnClick(e, name)}>
+                      {`${index + 1}.`}
+                      <Chip label={name} variant="outlined" />
+                      <Chip label={now_lic_no} variant="outlined" />
+                      <Chip label={guilds} variant="outlined" />
+                      <Chip label={`官司數:${total_litigates}`} variant="outlined" />
+                      <Chip label={`勝率:${win_rate}`} variant="outlined" />
+                      <Chip label={`專長:${law_issues}`} variant="outlined" />
 
-                        {/* name: string;
+                      {/* <Button variant={name == selectLawyer ? "contained" : "text"} >
+                        Detail */}
+                      {/* {`${name}, ${now_lic_no}, ${guilds}, 官司數:${total_litigates}, 勝率:${win_rate} , ${law_issues}`} */}
+
+                      {/* name: string;
                             now_lic_no: string;
                             guilds: string[];
                             office: string;
@@ -176,8 +199,8 @@ function App() {
                             law_issues: string[]; 
                       */}
 
-                      </Button>
-                    </Box>);
+                      {/* </Button> */}
+                    </Card>);
                 })}
                 {/* </Paper> */}
               </div>
@@ -186,28 +209,32 @@ function App() {
           <Grid xs={4}>
             <StyledPaper2>
               <div>
-                Lawyer Detail Panel
+                Lawyer Detail Panel <br></br>
                 {/* <Button>1fdsfsafsaf</Button>
                 <Button>2sfdsafdsafasfasd</Button> */}
-                {judgmentList.map((judgment) => {
+                {judgmentList.map((judgment, index) => {
                   console.log("judgment!!!", judgment)
                   const { court, file_uri, reason, mainText, relatedIssues, party } = judgment;
                   return (
-                    <Paper elevation={3} key={file_uri}>
-                      {`${court}`}<br />
-                      {`${file_uri}`}<br />
-                      {`${reason}`}<br />
-                      {`${mainText}`}<br />
-                      {`${relatedIssues.map((r) => `${r.lawName}-${r.issueRef}.`)}`} <br />
-                      {party.map((p) => {
-                        // 陣營:{p.group}, 
-                        return (
-                          <>
-                            {p.title}, {p.value} <br></br>
-                          </>
-                        );
-                      })}
-                    </Paper>)
+                    // Paper elevation={3}        
+                    <>
+                      {`no.${index + 1}`}
+                      <Card key={file_uri} style={{ margin: 25 }}>
+                        {`${court}`}<br />
+                        {`${file_uri}`}<br />
+                        {`${reason}`}<br />
+                        {`${mainText}`}<br />
+                        {`${relatedIssues.map((r) => `${r.lawName}-${r.issueRef}.`)}`} <br />
+                        {party.map((p) => {
+                          // 陣營:{p.group}, 
+                          return (
+                            <>
+                              {p.title}, {p.value} <br></br>
+                            </>
+                          );
+                        })}
+                      </Card>
+                    </>)
                 })}
               </div>
             </StyledPaper2>
