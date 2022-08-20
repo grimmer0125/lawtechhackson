@@ -26,9 +26,9 @@ class AIService:
     def load_stopwords(self):
         """loading Chinese stopwords """
         stpwrdpath = "./sample_data/chinese"
-        with open(stpwrdpath,'rb') as fp:
-            stopword_ = fp.read().decode('utf-8') # readin stopwords
-        self.stopwords = stopword_.splitlines() # stopwords list
+        with open(stpwrdpath, 'rb') as fp:
+            stopword_ = fp.read().decode('utf-8')  # readin stopwords
+        self.stopwords = stopword_.splitlines()  # stopwords list
 
     def get_similiar_lawyers(self,
                              cosine_sim: np.ndarray,
@@ -43,7 +43,9 @@ class AIService:
         #sim_scores = sim_scores[0:input_lawyer]
 
         # using heapq to find max-k values
-        sim_scores = heapq.nlargest(input_lawyer, sim_scores, key = lambda x: x[1])
+        sim_scores = heapq.nlargest(input_lawyer,
+                                    sim_scores,
+                                    key=lambda x: x[1])
 
         # Get the lawyer indices
         lawyer_indices = [i[0] for i in sim_scores]
@@ -64,17 +66,19 @@ class AIService:
         found_lawyer_list = [lawyer[index] for index in lawyer_indices]
         return found_lawyer_list
 
-    def predict(self, query_str_list: list[str]) -> list[str]:
-        username = "nchureborn@gmail.com" #這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
-        apikey   = "U9klFNFijvCMGxEjSy&m4I#bQ!o#aJ$" #這裡填入您在 https://api.droidtown.co 登入後取得的 api Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
+    def predict(self, query_str: str) -> list[str]:
+        username = "nchureborn@gmail.com"  #這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        apikey = "U9klFNFijvCMGxEjSy&m4I#bQ!o#aJ$"  #這裡填入您在 https://api.droidtown.co 登入後取得的 api Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
         articut = Articut(username, apikey)
-        resultDICT = articut.parse(query_str_list)
+        resultDICT = articut.parse(query_str)
         query_str_list = resultDICT['result_segmentation'].split('/')
-        if self.stopwords==None:
+        if self.stopwords == None:
             self.load_stopwords()
-        query_str_list = [word for word in query_str_list if not word in self.stopwords]
+        query_str_list = [
+            word for word in query_str_list if not word in self.stopwords
+        ]
         result = self.lawyer_query(query_str_list)
-        
+
         return result
 
 

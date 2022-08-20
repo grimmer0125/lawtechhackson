@@ -58,8 +58,8 @@ class UserQuestionItem(BaseModel):
 async def query_lawyer(item: UserQuestionItem):
     # response_model=list[LawyerProfile]): TypeError: Object of type 'type' is not JSON serializable
     question = item.question
-    str_list = question.split()
-    lawyer_name_list = ai_service.predict(str_list)
+    # str_list = question.split()
+    lawyer_name_list = ai_service.predict(question)
     # lawyer_name_list
     laywer_profile_list = await lawyer_service.get_lawyers_profile(
         lawyer_name_list)
