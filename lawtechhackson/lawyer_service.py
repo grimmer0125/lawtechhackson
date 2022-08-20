@@ -45,16 +45,29 @@ class LawyerService:
                 non_duplicate_list.append(lawyer)
         return non_duplicate_list
 
-    async def get_lawyers_profile(self, lawyer_name_list: list[str]):
-
+    async def get_lawyers_data_in_db(self, lawyer_name_list: list[str]):
         lawyer_short_name_list = list(
             map(lambda x: x.replace("律師", ""), lawyer_name_list))
         lawyer_found_list = await Lawyer.find(
             In(Lawyer.name, lawyer_short_name_list)).to_list()
-
         lawyer_unique_list: list[
             Lawyer] = self.filter_duplicate(  # 所以這兩人都沒有同名的律師
                 lawyer_found_list)
+        return lawyer_unique_list
+
+    async def get_lawyers_profile(self, lawyer_name_list: list[str]):
+
+        # lawyer_short_name_list = list(
+        #     map(lambda x: x.replace("律師", ""), lawyer_name_list))
+        # lawyer_found_list = await Lawyer.find(
+        #     In(Lawyer.name, lawyer_short_name_list)).to_list()
+
+        lawyer_unique_list = await self.get_lawyers_data_in_db(lawyer_name_list
+                                                               )
+        # lawyer_unique_list: list[
+        #     Lawyer] = self.filter_duplicate(  # 所以這兩人都沒有同名的律師
+        #         lawyer_found_list)
+
         lawyer_name_unique_list = list(
             map(lambda x: x.name, lawyer_unique_list))
         # 感覺這邊應該也不用丟 lawyer_name_unique_list, 因為同名的本來就不會在 LawyerStat 裡。
