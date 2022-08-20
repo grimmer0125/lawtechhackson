@@ -6,8 +6,8 @@ from numpy.linalg import norm
 from sklearn.metrics.pairwise import cosine_similarity
 from typing import Any, Optional
 
-from pydantic import BaseModel
-from dataclasses import dataclass
+import heapq
+from ArticutAPI import Articut
 
 
 class AIService:

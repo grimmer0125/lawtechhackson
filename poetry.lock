@@ -1,4 +1,15 @@
 [[package]]
+name = "aniso8601"
+version = "9.0.1"
+description = "A library for parsing ISO 8601 strings."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+dev = ["pylint", "pyenchant", "pre-commit", "isort", "coverage", "black"]
+
+[[package]]
 name = "anyio"
 version = "3.6.1"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
@@ -14,6 +25,18 @@ sniffio = ">=1.1"
 doc = ["packaging", "sphinx-rtd-theme", "sphinx-autodoc-typehints (>=1.2.0)"]
 test = ["coverage[toml] (>=4.5)", "hypothesis (>=4.0)", "pytest (>=7.0)", "pytest-mock (>=3.6.1)", "trustme", "contextlib2", "uvloop (<0.15)", "mock (>=4)", "uvloop (>=0.15)"]
 trio = ["trio (>=0.16)"]
+
+[[package]]
+name = "articutapi"
+version = "1.2.2"
+description = "Articut NLP system provides not only finest results on Chinese word segmentaion (CWS), Part-of-Speech tagging (POS) and Named Entity Recogintion tagging (NER), but also the fastest online API service in the NLP industry."
+category = "main"
+optional = false
+python-versions = ">=3.6.1"
+
+[package.dependencies]
+graphene = "*"
+requests = ">=2.25.1"
 
 [[package]]
 name = "beanie"
@@ -113,6 +136,42 @@ python-versions = ">=3.7"
 [package.extras]
 docs = ["furo (>=2022.6.21)", "sphinx (>=5.1.1)", "sphinx-autodoc-typehints (>=1.19.1)"]
 testing = ["covdefaults (>=2.2)", "coverage (>=6.4.2)", "pytest (>=7.1.2)", "pytest-cov (>=3)", "pytest-timeout (>=2.1)"]
+
+[[package]]
+name = "graphene"
+version = "3.1"
+description = "GraphQL Framework for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+aniso8601 = ">=8,<10"
+graphql-core = ">=3.1,<3.3"
+graphql-relay = ">=3.1,<3.3"
+
+[package.extras]
+test = ["iso8601 (>=1,<2)", "pytz (==2022.1)", "mock (>=4,<5)", "promise (>=2.3,<3)", "coveralls (>=3.3,<4)", "snapshottest (>=0.6,<1)", "pytest-asyncio (>=0.16,<2)", "pytest-mock (>=3,<4)", "pytest-cov (>=3,<4)", "pytest-benchmark (>=3.4,<4)", "pytest (>=6,<7)"]
+dev = ["iso8601 (>=1,<2)", "pytz (==2022.1)", "mock (>=4,<5)", "promise (>=2.3,<3)", "coveralls (>=3.3,<4)", "snapshottest (>=0.6,<1)", "pytest-asyncio (>=0.16,<2)", "pytest-mock (>=3,<4)", "pytest-cov (>=3,<4)", "pytest-benchmark (>=3.4,<4)", "pytest (>=6,<7)", "flake8 (>=4,<5)", "black (==22.3.0)"]
+
+[[package]]
+name = "graphql-core"
+version = "3.2.1"
+description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
+category = "main"
+optional = false
+python-versions = ">=3.6,<4"
+
+[[package]]
+name = "graphql-relay"
+version = "3.2.0"
+description = "Relay library for graphql-core"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4"
+
+[package.dependencies]
+graphql-core = ">=3.2,<3.3"
 
 [[package]]
 name = "h11"
@@ -687,13 +746,15 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.11"
-content-hash = "1d9ad6ce8aae2135ecbff89fe5f3d6fa17dae3922866e0609659be81e5ad2e3c"
+content-hash = "ba745ed855827ddae54eb4dbd1dd578afa7ca25356dbc37bb5d5fd13a6352ab8"
 
 [metadata.files]
+aniso8601 = []
 anyio = [
     {file = "anyio-3.6.1-py3-none-any.whl", hash = "sha256:cb29b9c70620506a9a8f87a309591713446953302d7d995344d0d7c6c0c9a7be"},
     {file = "anyio-3.6.1.tar.gz", hash = "sha256:413adf95f93886e442aea925f3ee43baa5a765a64a0f52c6081894f9992fdd0b"},
 ]
+articutapi = []
 beanie = []
 certifi = [
     {file = "certifi-2022.6.15-py3-none-any.whl", hash = "sha256:fe86415d55e84719d75f8b69414f6438ac3547d2078ab91b67e779ef69378412"},
@@ -714,6 +775,9 @@ colorama = [
 dnspython = []
 fastapi = []
 filelock = []
+graphene = []
+graphql-core = []
+graphql-relay = []
 h11 = [
     {file = "h11-0.13.0-py3-none-any.whl", hash = "sha256:8ddd78563b633ca55346c8cd41ec0af27d3c79931828beffb46ce70a379e7442"},
     {file = "h11-0.13.0.tar.gz", hash = "sha256:70813c1135087a248a4d38cc0e1a0181ffab2188141a93eaf567940c3957ff06"},
