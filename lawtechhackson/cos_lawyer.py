@@ -56,6 +56,9 @@ class AIService:
 
     def lawyer_query(self, user_input: list[str]) -> list[str]:
         query_emd = self.model.encode(user_input)
+        if len(query_emd)>1 :
+            query_emd = np.mean(np.array(query_emd),axis=0)
+
         search_emd = np.array(list(self.lawyer_emd.values()))
         cosine_sim = cosine_similarity(
             search_emd,
