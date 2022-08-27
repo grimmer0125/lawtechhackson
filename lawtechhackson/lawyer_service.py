@@ -5,6 +5,7 @@ from lawtechhackson.db_models import JudgmentVictoryLawyerInfo, Judgment, Lawyer
 from beanie.operators import In
 from typing import Any
 from pydantic import BaseModel
+from lawtechhackson.judgment_manager import check_lawyer_is_defeated
 
 
 class LawyerProfile(BaseModel):
@@ -15,6 +16,11 @@ class LawyerProfile(BaseModel):
     total_litigates: int = 0
     win_rate: float = 0
     law_issues: list[str] = []
+
+
+class LawyerDetailItem(BaseModel):
+    judgment: Judgment
+    is_defeated: bool
 
 
 class LawyerService:
@@ -120,7 +126,7 @@ class LawyerService:
             JudgmentVictoryLawyerInfo.lawyer_name == shortname).to_list()
 
         query_limit = 10
-        judgment_list: list[Judgment] = []
+        judgment_list: list[LawyerDetailItem] = []
         # TODO(n+1 query): mongoDB 的 In 有可能兩種 query嗎?
         for i, judgmentVictory in enumerate(judgmentVictory_list):
             if i >= query_limit:
@@ -132,5 +138,9 @@ class LawyerService:
                 Judgment.court == judgmentVictory.court,
                 Judgment.file_uri == judgmentVictory.file_uri)
             if judgment is not None:
-                judgment_list.append(judgment)
+                is_defeated = check_lawyer_is_defeated(shortname, judgment)
+                lawyerDetailItem = LawyerDetailItem(judgment=judgment,
+                                                    is_defeated=is_defeated)
+                judgment_list.append(lawyerDetailItem)
+
         return judgment_list

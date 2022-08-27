@@ -199,15 +199,7 @@ async def fill_lawyer_stat(is_defeated: bool, laywyer_name: str,
 # find = False
 
 
-async def parse_judgment(judgment: Judgment):
-    # 民事:
-    # - 被告應給付$$$元 (不一定)
-    # - m 判決結果 會寫原告之訴駁回 之類
-    # 刑事:
-    # - 被告處有期徒刑xx(多久）
-    # - 被告無罪
-
-    # NOTE: 整理用 mainText　裡的關鍵字來判斷
+def check_judgment_is_defeated(judgment: Judgment):
     is_defeated = False
     if judgment.sys == LawType.Civil:
         mainText = judgment.mainText
@@ -219,6 +211,40 @@ async def parse_judgment(judgment: Judgment):
     else:
         # TODO: handle LawType.Criminal later
         pass
+    return is_defeated
+
+
+def check_lawyer_is_defeated(target_lawyer_name: str, judgment: Judgment):
+
+    target_shortname = target_lawyer_name.replace("律師", "")
+    laywyer_is_defeated = False
+
+    is_defeated = check_judgment_is_defeated(judgment)
+    group_lawyer_list = find_lawyers(judgment)
+    for group_lawyer in group_lawyer_list:
+        laywyer_name = group_lawyer[Key.lawyer_name]
+        group = group_lawyer[Key.group]
+
+        shortname = laywyer_name.replace("律師", "")
+        if target_shortname == shortname:
+            if group == PartyGroup.plaintiff:
+                laywyer_is_defeated = is_defeated
+            else:
+                laywyer_is_defeated = not is_defeated
+            break
+    return laywyer_is_defeated
+
+
+async def parse_judgment(judgment: Judgment):
+    # 民事:
+    # - 被告應給付$$$元 (不一定)
+    # - m 判決結果 會寫原告之訴駁回 之類
+    # 刑事:
+    # - 被告處有期徒刑xx(多久）
+    # - 被告無罪
+
+    # NOTE: 整理用 mainText　裡的關鍵字來判斷
+    is_defeated = check_judgment_is_defeated(judgment)
 
     group_lawyer_list = find_lawyers(judgment)
 

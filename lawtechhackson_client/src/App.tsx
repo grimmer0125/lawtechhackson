@@ -52,6 +52,11 @@ interface Judgment {
   // law_issues: string[];
 }
 
+interface JudgmentDetail {
+  judgment: Judgment;
+  is_defeated: boolean;
+}
+
 const StyledBox = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
@@ -74,7 +79,7 @@ const StyledPaper2 = styled(Paper)(({ theme }) => ({
   ...theme.typography.body2,
   padding: theme.spacing(1),
   color: theme.palette.text.secondary,
-  height: "100vh"
+  minHeight: "100vh"
 }));
 
 /** emotion: https://mui.com/zh/material-ui/guides/interoperability/#emotion */
@@ -88,7 +93,7 @@ function App() {
   const [searchValue, setSearchValue] = React.useState('');
   const [lawyerProfileList, setLawyerProfileList] = React.useState<LawyerProfile[]>([]);
   const [selectLawyer, setSelectLawyer] = React.useState("");
-  const [judgmentList, setJudgmentList] = React.useState<Judgment[]>([]);
+  const [judgmentList, setJudgmentList] = React.useState<JudgmentDetail[]>([]);
 
 
   const handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -215,20 +220,23 @@ function App() {
           <Grid xs={6}>
             <StyledPaper2>
               <div>
-                <Typography variant="h2" gutterBottom component="div">
-                  Lawyer Detail Panel
-                </Typography>
+                {judgmentList.length > 0 ? (
+                  <Typography variant="h2" gutterBottom component="div">
+                    Lawyer Detail Panel
+                  </Typography>) : null}
 
                 {/* <Button>1fdsfsafsaf</Button>
                 <Button>2sfdsafdsafasfasd</Button> */}
-                {judgmentList.map((judgment, index) => {
-                  console.log("judgment!!!", judgment)
+                {judgmentList.map((judgmentDetail, index) => {
+                  console.log("judgmentDetail!!!", judgmentDetail)
+                  const { judgment, is_defeated } = judgmentDetail
                   const { court, file_uri, reason, mainText, relatedIssues, party } = judgment;
                   return (
                     // Paper elevation={3}        
                     <>
 
                       <Chip color="success" label={`no.${index + 1}`} variant="outlined" />
+                      <Chip color="success" label={is_defeated ? "輸" : "贏"} variant="outlined" />
 
                       <Card key={file_uri} style={{ margin: 25 }}>
                         {`${court}`}<br />

@@ -11,11 +11,12 @@
 #  1. Containers. Provides declarative and dynamic containers. See Containers.
 
 from typing import Union
+from xmlrpc.client import boolean
 from fastapi import FastAPI
 from pydantic import BaseModel
 from lawtechhackson.cos_lawyer import AIService
 from lawtechhackson.db_models import Judgment
-from lawtechhackson.lawyer_service import LawyerProfile, LawyerService
+from lawtechhackson.lawyer_service import LawyerProfile, LawyerService, LawyerDetailItem
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -74,7 +75,7 @@ class LawyerDetailQueryItem(BaseModel):
     # now_lic_no: Optional[str]
 
 
-@app.post("/lawyer-detail", response_model=list[Judgment])
+@app.post("/lawyer-detail", response_model=list[LawyerDetailItem])
 async def lawyer_detail(item: LawyerDetailQueryItem):
     lawyer_name = item.lawyer_name
     judgment_list = await lawyer_service.get_lawyer_detail_profile(lawyer_name)
