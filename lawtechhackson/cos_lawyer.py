@@ -46,7 +46,7 @@ class AIService:
         cosine_sim = cosine_similarity(
             search_emd,
             query_emd)  # using cosine_sim in scikit learn for quick access
-        lawyer_indices = self.get_similiar_lawyers(cosine_sim, 3)
+        lawyer_indices = self.get_similiar_lawyers(cosine_sim, 6)
         lawyer = list(self.lawyer_emd.keys())
 
         found_lawyer_list = [lawyer[index] for index in lawyer_indices]
