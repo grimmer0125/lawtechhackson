@@ -58,7 +58,6 @@ const StyledBox = styled(Box)(({ theme }) => ({
   padding: theme.spacing(1),
   textAlign: 'center',
   color: theme.palette.text.secondary,
-  height: "100vh"
 }));
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
@@ -138,59 +137,59 @@ function App() {
     <React.Fragment>
       <Box sx={{ flexGrow: 1 }}>
         <Grid container spacing={1}>
-          <Grid xs={4}>
-            <StyledPaper>Perfect Match
-              <Box
-                component="form"
-                sx={{
-                  '& > :not(style)': { m: 1, width: '25ch' },
-                }}
-                autoComplete="off"
-              >
-                <TextField style={{ width: 350 }} value={searchValue} onChange={handleSearchInputChange}
-                  onKeyPress={(event) => {
-                    if (event.key === 'Enter') {
-                      console.log('Enter Pressed')
-                      event.preventDefault();
-                      onSearchBtnClick();
-                    }
-                  }}
-                  id="outlined-basic" label="請輸入你的法律問題或關鍵字" variant="outlined" />
-              </Box>
-              <Button variant="contained" onClick={onSearchBtnClick}>送出</Button>
-            </StyledPaper>
-          </Grid>
-          <Grid xs={4}>
+          <Grid xs={6}>
             <StyledPaper2>
-              <div>
+              <StyledBox>
+                Perfect Match
+                <Box
+                  component="form"
+                  sx={{
+                    '& > :not(style)': { m: 1, width: '25ch' },
+                  }}
+                  autoComplete="off"
+                >
+                  <TextField style={{ width: 350 }} value={searchValue} onChange={handleSearchInputChange}
+                    onKeyPress={(event) => {
+                      if (event.key === 'Enter') {
+                        console.log('Enter Pressed')
+                        event.preventDefault();
+                        onSearchBtnClick();
+                      }
+                    }}
+                    id="outlined-basic" label="請輸入你的法律問題或關鍵字" variant="outlined" />
+                </Box>
+                <Button variant="contained" onClick={onSearchBtnClick}>送出</Button>
+              </StyledBox>
+              {/* <Grid xs={4}> */}
+              <Box>
+                <div>
+                  {/* <Paper style={{ height: "100vh" }}> */}
+                  {/* Lawyers Results Panel */}
+                  {lawyerProfileNoneEmptyList.map((lawyerProfile, index) => {
+                    const { name, now_lic_no, guilds, total_litigates, win_rate, law_issues } = lawyerProfile;
+                    // const selected = name === selectLawyer ? true : false;
+                    let borderStyle = {}
+                    if (name === selectLawyer) {
+                      borderStyle = { border: "1px solid red" }
+                    }
+                    // if (selected) {
+                    //   borderStyle = {}
+                    // }
+                    return (
+                      <Card key={now_lic_no} style={{ margin: 15, ...borderStyle }} onClick={(e) => onDetailBtnClick(e, name)}>
+                        {`${index + 1}.`}
+                        <Chip label={name} variant="outlined" />
+                        <Chip label={now_lic_no} variant="outlined" />
+                        <Chip label={guilds} variant="outlined" />
+                        <Chip label={`官司數:${total_litigates}`} variant="outlined" />
+                        <Chip label={`勝率:${win_rate}`} variant="outlined" />
+                        <Chip label={`專長:${law_issues}`} variant="outlined" />
 
-                {/* <Paper style={{ height: "100vh" }}> */}
-                Lawyers Results Panel
-                {lawyerProfileNoneEmptyList.map((lawyerProfile, index) => {
-                  const { name, now_lic_no, guilds, total_litigates, win_rate, law_issues } = lawyerProfile;
-                  // const selected = name === selectLawyer ? true : false;
-                  let borderStyle = {}
-                  if (name === selectLawyer) {
-                    borderStyle = { border: "1px solid red" }
-                  }
-                  // if (selected) {
-                  //   borderStyle = {}
-                  // }
-                  return (
-                    <Card key={now_lic_no} style={{ margin: 15, ...borderStyle }} onClick={(e) => onDetailBtnClick(e, name)}>
-                      {`${index + 1}.`}
-                      <Chip label={name} variant="outlined" />
-                      <Chip label={now_lic_no} variant="outlined" />
-                      <Chip label={guilds} variant="outlined" />
-                      <Chip label={`官司數:${total_litigates}`} variant="outlined" />
-                      <Chip label={`勝率:${win_rate}`} variant="outlined" />
-                      <Chip label={`專長:${law_issues}`} variant="outlined" />
-
-                      {/* <Button variant={name == selectLawyer ? "contained" : "text"} >
+                        {/* <Button variant={name == selectLawyer ? "contained" : "text"} >
                         Detail */}
-                      {/* {`${name}, ${now_lic_no}, ${guilds}, 官司數:${total_litigates}, 勝率:${win_rate} , ${law_issues}`} */}
+                        {/* {`${name}, ${now_lic_no}, ${guilds}, 官司數:${total_litigates}, 勝率:${win_rate} , ${law_issues}`} */}
 
-                      {/* name: string;
+                        {/* name: string;
                             now_lic_no: string;
                             guilds: string[];
                             office: string;
@@ -199,14 +198,17 @@ function App() {
                             law_issues: string[]; 
                       */}
 
-                      {/* </Button> */}
-                    </Card>);
-                })}
-                {/* </Paper> */}
-              </div>
+                        {/* </Button> */}
+                      </Card>);
+                  })}
+                  {/* </Paper> */}
+                </div>
+              </Box>
             </StyledPaper2>
+
+            {/* </Grid> */}
           </Grid>
-          <Grid xs={4}>
+          <Grid xs={6}>
             <StyledPaper2>
               <div>
                 Lawyer Detail Panel <br></br>
