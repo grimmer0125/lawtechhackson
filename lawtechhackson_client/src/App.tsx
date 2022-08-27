@@ -146,7 +146,7 @@ function App() {
           <Grid xs={6}>
             <StyledPaper2>
               <StyledBox>
-                <Typography variant="h1" gutterBottom component="div">
+                <Typography color="#9a70f3" variant="h1" gutterBottom component="div">
                   Perfect Match
                 </Typography>
                 <Box
@@ -178,7 +178,7 @@ function App() {
                     // const selected = name === selectLawyer ? true : false;
                     let borderStyle = {}
                     if (name === selectLawyer) {
-                      borderStyle = { border: "1px solid red" }
+                      borderStyle = { border: "2px solid #FF7F50" }
                     }
                     // if (selected) {
                     //   borderStyle = {}
@@ -222,7 +222,7 @@ function App() {
             <StyledPaper2>
               <div>
                 {judgmentList.length > 0 ? (
-                  <Typography variant="h2" gutterBottom component="div">
+                  <Typography color="#9a70f3" variant="h2" gutterBottom component="div">
                     Lawyer Detail Panel
                   </Typography>) : null}
 
