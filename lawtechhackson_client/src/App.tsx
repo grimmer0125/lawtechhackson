@@ -179,7 +179,9 @@ function App() {
                     // }
                     return (
                       <Card key={now_lic_no} style={{ margin: 15, ...borderStyle }} onClick={(e) => onDetailBtnClick(e, name)}>
-                        {`${index + 1}.`}
+
+                        <Chip color="primary" label={`${index + 1}.`} variant="outlined" />
+
                         <Chip label={name} variant="outlined" />
                         <Chip label={now_lic_no} variant="outlined" />
                         <Chip label={guilds} variant="outlined" />
@@ -225,7 +227,9 @@ function App() {
                   return (
                     // Paper elevation={3}        
                     <>
-                      {`no.${index + 1}`}
+
+                      <Chip color="success" label={`no.${index + 1}`} variant="outlined" />
+
                       <Card key={file_uri} style={{ margin: 25 }}>
                         {`${court}`}<br />
                         {`${file_uri}`}<br />
