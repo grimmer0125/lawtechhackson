@@ -57,6 +57,7 @@ interface JudgmentDetail {
   is_defeated: boolean;
 }
 
+
 const StyledBox = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   ...theme.typography.body2,
@@ -185,9 +186,9 @@ function App() {
                     return (
                       <Card key={now_lic_no} style={{ margin: 15, ...borderStyle }} onClick={(e) => onDetailBtnClick(e, name)}>
 
-                        <Chip color="primary" label={`${index + 1}.`} variant="outlined" />
+                        <Chip color="primary" sx={{ fontSize: '1.5rem' }} label={`${index + 1}.`} variant="outlined" />
 
-                        <Chip label={name} variant="outlined" />
+                        <Chip label={name} sx={{ fontSize: '1rem' }} variant="outlined" />
                         <Chip label={now_lic_no} variant="outlined" />
                         <Chip label={guilds} variant="outlined" />
                         <Chip label={`官司數:${total_litigates}`} variant="outlined" />
