@@ -6,8 +6,8 @@ import Grid from '@mui/material/Unstable_Grid2';
 import TextField from '@mui/material/TextField';
 import { Button } from '@mui/material';
 import Card from '@mui/material/Card';
-
 import Chip from '@mui/material/Chip';
+import Typography from '@mui/material/Typography';
 
 import axios from 'axios';
 
@@ -140,7 +140,9 @@ function App() {
           <Grid xs={6}>
             <StyledPaper2>
               <StyledBox>
-                Perfect Match
+                <Typography variant="h1" gutterBottom component="div">
+                  Perfect Match
+                </Typography>
                 <Box
                   component="form"
                   sx={{
@@ -211,7 +213,10 @@ function App() {
           <Grid xs={6}>
             <StyledPaper2>
               <div>
-                Lawyer Detail Panel <br></br>
+                <Typography variant="h2" gutterBottom component="div">
+                  Lawyer Detail Panel
+                </Typography>
+
                 {/* <Button>1fdsfsafsaf</Button>
                 <Button>2sfdsafdsafasfasd</Button> */}
                 {judgmentList.map((judgment, index) => {
