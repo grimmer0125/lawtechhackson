@@ -36,11 +36,11 @@ VSCode way:
 ### Backend: Python API server 
 
 ```
-docker build -f Dockerfile.backend -t perfect-match-py .
-docker run -p 8000:8000 --name perfect-match-py perfect-match-py
+docker build -f Dockerfile.backend -t perfect-match-backend .
+docker run -p 8000:8000 --name perfect-match-backend  perfect-match-backend 
 ```
 
-You can open http://localhost:8000/docs to check 
+You can open http://localhost:8000 to check 
 
 ### Frontend: React + Node.js Dev Server 
 
@@ -50,3 +50,10 @@ docker run -p 3000:3000 --name perfect-match-frontend perfect-match-frontend
 ### Run 
 
 open http://localhost:3000
+
+## Docker: Mount the current folder to live Change + Run (not test yet)
+
+1. remove all `COPY` from Dockerfile.frontend & Dockerfile.backend
+2. Execute same docker build for these two files 
+3. docker run -p 8000:8000 -v ${PWD}:/workspace --name perfect-match-backend  perfect-match-backend 
+4. docker run -p 3000:3000 -v ${PWD}/lawtechhackson_client:/workspace/lawtechhackson_client --name perfect-match-frontend perfect-match-frontend
