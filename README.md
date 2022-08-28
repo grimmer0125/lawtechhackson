@@ -30,3 +30,23 @@ VSCode way:
 
 - Make sure that you select Python local poetry interpreter/environment, use cmd+shift+p to select or select on the VSCode UI. Usually the name should include `poetry` or `.venv` 
 - Open the target file. Then Use VSCode F5 to launch and debug. 
+
+## Docker 
+
+### Backend: Python API server 
+
+```
+docker build -f Dockerfile.backend -t perfect-match-py .
+docker run -p 8000:8000 --name perfect-match-py perfect-match-py
+```
+
+You can open http://localhost:8000/docs to check 
+
+### Frontend: React + Node.js Dev Server 
+
+docker build -f Dockerfile.frontend -t perfect-match-frontend .
+docker run -p 3000:3000 --name perfect-match-frontend perfect-match-frontend
+
+### Run 
+
+open http://localhost:3000

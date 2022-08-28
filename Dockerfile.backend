@@ -1,0 +1,25 @@
+FROM python:3.9.2
+
+WORKDIR /workspace
+
+# replace shell with bash so we can source files
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+
+RUN apt-get update
+RUN apt-get install -y curl unzip git
+
+RUN echo "Install poetry"
+RUN pip install -U pip \
+    && apt install -y netcat \ 
+    && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
+ENV PATH="${PATH}:/root/.poetry/bin" 
+
+COPY pyproject.toml /workspace/pyproject.toml
+COPY poetry.lock /workspace/poetry.lock
+RUN poetry install
+
+COPY . .
+
+EXPOSE 8000
+ENV production=1
+CMD ["poetry", "run", "uvicorn", "lawtechhackson.server_main:app", "--port", "8000", "--host", "0.0.0.0", "--timeout-keep-alive", "180"]
