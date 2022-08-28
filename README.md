@@ -1,6 +1,6 @@
 # LawTech Hackson 2022
 
-### Installation
+## Installation
 
 - (Optional) Install [pyenv](https://github.com/pyenv/pyenv) to easily switch Python.
 - Use Python 3.9.2+. Via pyenv: `pyenv install 3.9.2`.
@@ -13,7 +13,7 @@
 
 This project uses [yapf](https://github.com/google/yapf).
 
-### Local Dev
+## Local Dev
 
 Command line ways :
 
@@ -33,7 +33,9 @@ VSCode way:
 
 ## Docker 
 
-### Backend: Python API server 
+### Backend: Python API server (use Python 3.9.2 base image)
+
+Please fill `mongo_connect_str` in `.env` first, then the built docker image will use it. Or `-e mongo_connect_str=value` while `docker run`
 
 ```
 docker build -f Dockerfile.backend -t perfect-match-backend .
@@ -51,9 +53,9 @@ docker run -p 3000:3000 --name perfect-match-frontend perfect-match-frontend
 
 open http://localhost:3000
 
-## Docker: Mount the current folder to live Change + Run (not test yet)
+~~## Docker: Mount the current folder to live Change + Run (not test yet)~~
 
-1. remove all `COPY` from Dockerfile.frontend & Dockerfile.backend
-2. Execute same docker build for these two files 
-3. docker run -p 8000:8000 -v ${PWD}:/workspace --name perfect-match-backend  perfect-match-backend 
-4. docker run -p 3000:3000 -v ${PWD}/lawtechhackson_client:/workspace/lawtechhackson_client --name perfect-match-frontend perfect-match-frontend
+~~1. remove all `COPY` from Dockerfile.frontend & Dockerfile.backend~~
+~~2. Execute same docker build for these two files~~ 
+~~3. docker run -p 8000:8000 -v ${PWD}:/workspace --name perfect-match-backend  perfect-match-backend~~
+~~4. docker run -p 3000:3000 -v ${PWD}/lawtechhackson_client:/workspace/lawtechhackson_client --name perfect-match-frontend perfect-match-frontend~~
