@@ -19,12 +19,13 @@ Command line ways :
 
 way 1. 
 
-- `poetry run python lawtechhackson/server_main.py`
+- ~~`poetry run python lawtechhackson/server_main.py`~~ `poetry run uvicorn lawtechhackson.server_main:app --reload`
 
 way 2. 
 
 1. `poetry shell`
-2. `python lawtechhackson/server_main.py`
+2. ~~`python lawtechhackson/server_main.py`~~ `uvicorn lawtechhackson.server_main:app --reload`
+
 
 VSCode way:
 
