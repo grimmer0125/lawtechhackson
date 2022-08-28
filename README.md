@@ -42,7 +42,7 @@ docker build -f Dockerfile.backend -t perfect-match-backend .
 docker run -p 8000:8000 --name perfect-match-backend  perfect-match-backend 
 ```
 
-You can open http://localhost:8000 to check 
+You can open http://localhost:8000 to check. 
 
 ### Frontend: React + Node.js Dev Server 
 
@@ -53,9 +53,15 @@ docker run -p 3000:3000 --name perfect-match-frontend perfect-match-frontend
 
 open http://localhost:3000
 
-~~## Docker: Mount the current folder to live Change + Run (not test yet)~~
+## Docker: Mount the current folder to live Change + Run
+Frontend: 
+- docker run -ti -p 3000:3000 -v ${PWD}/lawtechhackson_client:/workspace/lawtechhackson_client --name perfect-match-frontend.dev node:16.13.0-stretch-slim /bin/bash
+- cd workspace/lawtechhackson_client
+- `yarn install` (first time)
+- yarn start
 
-~~1. remove all `COPY` from Dockerfile.frontend & Dockerfile.backend~~
-~~2. Execute same docker build for these two files~~ 
-~~3. docker run -p 8000:8000 -v ${PWD}:/workspace --name perfect-match-backend  perfect-match-backend~~
-~~4. docker run -p 3000:3000 -v ${PWD}/lawtechhackson_client:/workspace/lawtechhackson_client --name perfect-match-frontend perfect-match-frontend~~
+Backend: 
+1. docker build -f Dockerfile.backend.base -t perfect-match-backend.dev .
+2. docker run -ti -p 8000:8000 -v ${PWD}:/workspace --name perfect-match-backend.dev perfect-match-backend.dev /bin/bash
+3. poetry install
+5. ~~`poetry run python lawtechhackson/server_main.py`~~ (<-somehow it does not work. Only `LawyerService init` printed, and terminated, no `start to init module` printed). Use this to start: `poetry run uvicorn lawtechhackson.server_main:app --port 8000 --host 0.0.0.0 --timeout-keep-alive 180`
