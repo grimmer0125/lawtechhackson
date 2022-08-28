@@ -1,12 +1,12 @@
 FROM node:16.13.0-stretch-slim
 
-WORKDIR /workspace
-COPY package.json /workspace/package.json
-COPY package-lock.json /workspace/package-lock.json
-RUN npm ci
+WORKDIR /workspace/lawtechhackson_client
 
-COPY . /workspace
+COPY ./lawtechhackson_client/package.json /workspace/lawtechhackson_client/package.json
+COPY ./lawtechhackson_client/yarn.lock /workspace/lawtechhackson_client/yarn.lock
+RUN yarn install --frozen-lockfile
 
+COPY lawtechhackson_client/. /workspace/lawtechhackson_client
 EXPOSE 3000
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
