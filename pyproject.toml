@@ -15,6 +15,7 @@ pymongo = {extras = ["srv"], version = "^4.2.0"}
 sentence-transformers = "^2.2.2"
 fastapi = "^0.79.0"
 uvicorn = {extras = ["standard"], version = "^0.18.2"}
+ArticutAPI = "^1.2.2"
 
 [tool.poetry.dev-dependencies]
 yapf = "^0.32.0"
