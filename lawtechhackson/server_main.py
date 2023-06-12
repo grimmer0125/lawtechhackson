@@ -1,7 +1,7 @@
 # TODO:
 # 使用 https://github.com/ets-labs/python-dependency-injector
 # 1. 初始化 DB / AI
-#   1. singleton
+#   1. singleton https://python-dependency-injector.ets-labs.org/providers/singleton.html
 #   2. or resource https://python-dependency-injector.ets-labs.org/providers/resource.html
 # 2. 跟 fastapi 整合
 #   1. https://python-dependency-injector.ets-labs.org/examples/fastapi.html#fastapi-example

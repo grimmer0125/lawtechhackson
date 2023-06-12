@@ -72,8 +72,8 @@ class AIService:
         return found_lawyer_list
 
     def predict(self, query_str: list[str]) -> list[str]:
-        username = "nchureborn@gmail.com"  #這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
-        apikey = "U9klFNFijvCMGxEjSy&m4I#bQ!o#aJ$"  #這裡填入您在 https://api.droidtown.co 登入後取得的 api Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        username = ""  #這裡填入您在 https://api.droidtown.co 使用的帳號 email。若使用空字串，則預設使用每小時 2000 字的公用額度。
+        apikey = ""  #這裡填入您在 https://api.droidtown.co 登入後取得的 api Key。若使用空字串，則預設使用每小時 2000 字的公用額度。
         articut = Articut(username, apikey)
         resultDICT = articut.parse(query_str[0])
         query_str_list = resultDICT['result_segmentation'].split('/')
